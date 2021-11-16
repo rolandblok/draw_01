@@ -17,7 +17,7 @@ class wave_circle {
         this.gui.removeFolder('wave circle draw options')
     }
 
-    draw() {
+    draw(p) {
 
         let w = window.innerWidth
         let h = window.innerHeight
@@ -25,36 +25,36 @@ class wave_circle {
         let Middle = h / 2
         let Right = h
 
-        clear()
-        stroke([0, 0, 0])  // BLACK
+        p.clear()
+        p.stroke([0, 0, 0])  // BLACK
 
         let R = 0.5 * h / 1.2
 
         // SINS
-        strokeWeight(1)
+        p.strokeWeight(1)
         for (let y = 0; y < h; y += this.settings.line_width) {
 
             if ((y > (h / 2 - R)) && (y < (h / 2 + R))) {
                 let z = h / 2 - y
-                beginShape()
-                let ll = sqrt(R * R - z * z)
+                p.beginShape()
+                let ll = p.sqrt(R * R - z * z)
                 let left = Middle - ll
                 let right = Middle + ll
                 let width = 2 * ll
                 // lines
-                line(Left, y, left, y)
-                line(right, y, Right, y)
+                p.line(Left, y, left, y)
+                p.line(right, y, Right, y)
 
                 // waves
-                let freq = round(random(1, 15))
+                let freq = p.round(p.random(1, 15))
                 for (let x = left; x < right; x++) {
-                    let S = y + 0.4 * this.settings.line_width * sin(TWO_PI * (x - left) * freq / width)
-                    vertex(x, S)
+                    let S = y + 0.4 * this.settings.line_width * p.sin(p.TWO_PI * (x - left) * freq / width)
+                    p.vertex(x, S)
                 }
-                endShape()
+                p.endShape()
             } else {
                 // lines
-                line(Left, y, Right, y)
+                p.line(Left, y, Right, y)
             }
         }
         return

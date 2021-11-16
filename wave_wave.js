@@ -27,7 +27,7 @@ class wave_wave {
         this.gui.removeFolder('wave wave draw options')
     }
 
-    draw() {
+    draw(p) {
 
         let w = window.innerWidth
         let h = window.innerHeight
@@ -35,24 +35,24 @@ class wave_wave {
         let Middle = h / 2
         let Right = h
 
-        clear()
-        stroke([0, 0, 0])  // BLACK
+        p.clear()
+        p.stroke([0, 0, 0])  // BLACK
 
         let R = 0.5 * h / 1.2
 
         // SINS
-        strokeWeight(1)
-        noFill()
+        p.strokeWeight(1)
+        p.noFill()
         for (let y = -20; y < h+20; y += this.settings.line_width) {
-            let ph_offset = this.settings.ph_scale*sin(PI*0.001*this.settings.ph_period_scale*y)
-            let ph_offset2 = this.settings.ph_scale2*sin(PI*0.001*this.settings.ph_period_scale2*y)
-            beginShape()
+            let ph_offset = this.settings.ph_scale*p.sin(p.PI*0.001*this.settings.ph_period_scale*y)
+            let ph_offset2 = this.settings.ph_scale2*p.sin(p.PI*0.001*this.settings.ph_period_scale2*y)
+            p.beginShape()
             for (let x = Left; x < Right; x+=10) {
-                let S = y + this.settings.sin_scale * this.settings.line_width * sin(TWO_PI * 0.01* (x+ph_offset+ph_offset2))
-                vertex(x, S)
+                let S = y + this.settings.sin_scale * this.settings.line_width * p.sin(p.TWO_PI * 0.01* (x+ph_offset+ph_offset2))
+                p.vertex(x, S)
 
             }
-            endShape()
+            p.endShape()
         }
     }
     return

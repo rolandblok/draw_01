@@ -30,97 +30,95 @@ dat.GUI.prototype.removeFolder = function(name) {
   this.onResize();
 }
 
-// =================
-// ===setup=========
-// =================
-function setup() {
-  // createCanvas(400,400)
-  createCanvas(window.innerWidth, window.innerHeight)
-  // createCanvas(window.innerWidth, window.innerHeight,SVG)
-  // https://github.com/zenozeng/p5.js-svg/
-  // https://makeyourownalgorithmicart.blogspot.com/2018/03/creating-svg-with-p5js.html
-  // https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
-  
-  noLoop();
-  addEventListener("resize", this.resize, false);
-  
-  window.addEventListener("focus", function(event) { console.log( "window has focus"); paused = false }, false);
-  window.addEventListener("blur", function(event) { console.log( "window lost focus");paused = true }, false);
-  
+addEventListener("resize", this.resize, false);
+window.addEventListener("focus", function(event) { console.log( "window has focus"); paused = false }, false);
+window.addEventListener("blur", function(event) { console.log( "window lost focus");paused = true }, false);
+
+// settings.downloadSvg=()=>
+// {
+//     let svgElement = document.getElementsByTagName('svg')[0];
+//     let svg = svgElement.outerHTML;
+//     let file = new Blob([svg], { type: 'plain/text' });
+//     let a = document.createElement("a"), url = URL.createObjectURL(file);
+
+//     a.href = url;
+//     a.download = 'exported.svg';    
+//     document.body.appendChild(a);
+//     a.click();
+
+//     setTimeout(function() 
+//     {
+//         document.body.removeChild(a);
+//         window.URL.revokeObjectURL(url);  
+//     }, 0); 
+// }
+settings.downloadSvg=()=> {
+  console.log("save")
+  svg.save_canvas()
+}
+
+gui.add(settings, 'downloadSvg')
 
 
+let sketch = function(p) {
+  p.setup = function () {
+    // createCanvas(400,400)
+    if (p.type === "SCREEN") {
+      canvas = p.createCanvas(window.innerWidth, window.innerHeight)
+    } else if (p.type === "SVG") {
+      canvas_SVG = p.createCanvas(window.innerWidth, window.innerHeight, p.SVG)
+    }
+    // https://github.com/zenozeng/p5.js-svg/
+    // https://makeyourownalgorithmicart.blogspot.com/2018/03/creating-svg-with-p5js.html
+    // https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
+    
+    p.noLoop();
 
-  settings.downloadSvg=()=>
-  {
-      let svgElement = document.getElementsByTagName('svg')[0];
-      let svg = svgElement.outerHTML;
-      let file = new Blob([svg], { type: 'plain/text' });
-      let a = document.createElement("a"), url = URL.createObjectURL(file);
-  
-      a.href = url;
-      a.download = 'exported.svg';    
-      document.body.appendChild(a);
-      a.click();
-  
-      setTimeout(function() 
-      {
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);  
-      }, 0); 
+    set_draw_mode()
+    setup_done = true
   }
 
+  p.draw = function () {
+    if (!setup_done) return
+    
+    if (current_drawer != 0) {
+      current_drawer.draw(p)
+    }
+  }
 
-  gui.add(settings, 'downloadSvg')
-  settings.lines_drawn = 0
-  gui.add(settings, 'lines_drawn').listen()
-
-  set_draw_mode()
-  setup_done = true
+  p.save_canvas = function() {
+    if (p.type === "SVG") {
+      console.log("save")
+      p.draw()
+      p.save()
+    }
+  }
 
 }
 
-// =================
-// ===draw==========
-// =================
-var last_time_ms = 0
-var dirs = [-1, 1]
-
-function CS(x,y) {
-  return center2dscreen(window.innerWidth, window.innerHeight, [x,y])
-}
+var cvs = new p5(sketch, "canvas" )
+cvs.type = "SCREEN"
+var svg = new p5(sketch, "hidden_div")
+svg.type = "SVG"
 
 
-var drawer = 0
+var current_drawer = 0
 function set_draw_mode() {
-  if (drawer != 0) {
-    drawer.close()
+  if (current_drawer != 0) {
+    current_drawer.close()
   }
   if (settings.draw_mode == 'none') { 
-    drawer = 0
+    current_drawer = 0
   } else if (settings.draw_mode == 'wave_circle') {
-    drawer = new wave_circle(gui)
+    current_drawer = new wave_circle(gui)
   } else if (settings.draw_mode == 'wave_wave') {
-    drawer = new wave_wave(gui)
+    current_drawer = new wave_wave(gui)
   }
 
-  draw()
+  cvs.draw()
 }
 
-function draw() {
-  if (!setup_done) return
-  
-  // stats.begin();
 
-  dt_ms = millis() - last_time_ms
-  last_time_ms = millis()
-  
-  if (drawer != 0) {
-    drawer.draw()
-  }
-
-  // stats.end();
-
-}
 
 
 // =================
@@ -143,8 +141,7 @@ function keyPressed(event) {
 
 function resize() {
   console.log("resize")
-  resizeCanvas(window.innerWidth, window.innerHeight)
-  settings.aspect = window.innerWidth / window.innerHeight
-  draw()
+  cvs.resizeCanvas(window.innerWidth, window.innerHeight)
+  cvs.draw()
 
 }
