@@ -3,12 +3,12 @@
 
 class wave_circle {
 
-    constructor(gui) {
+    constructor(gui, cvs) {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave circle draw options')
         this.settings = []
         this.settings.line_width = 13 
-        this.gui_folder_draw_options.add(this.settings,'line_width').onChange(function(v){draw()}).min(3)
+        this.gui_folder_draw_options.add(this.settings,'line_width').onChange(function(v){ cvs.draw()}).min(3)
         this.gui_folder_draw_options.open()
       
     }

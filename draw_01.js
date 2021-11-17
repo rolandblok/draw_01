@@ -14,8 +14,8 @@ var uniqueID = (function() {
 
 var gui = new dat.GUI();
 var settings = []
-settings.draw_modes = ['none', 'wave_circle', 'wave_wave']
-settings.draw_mode = settings.draw_modes[2]
+settings.draw_modes = ['none', 'wave_circle', 'wave_wave', 'spirograph']
+settings.draw_mode = settings.draw_modes[3]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 var setup_done = false
 
@@ -110,9 +110,11 @@ function set_draw_mode() {
   if (settings.draw_mode == 'none') { 
     current_drawer = 0
   } else if (settings.draw_mode == 'wave_circle') {
-    current_drawer = new wave_circle(gui)
+    current_drawer = new wave_circle(gui,cvs)
   } else if (settings.draw_mode == 'wave_wave') {
-    current_drawer = new wave_wave(gui)
+    current_drawer = new wave_wave(gui,cvs)
+  } else if (settings.draw_mode == 'spirograph') {
+    current_drawer = new spirograph(gui,cvs)
   }
 
   cvs.draw()
