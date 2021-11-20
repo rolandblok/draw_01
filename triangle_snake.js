@@ -5,9 +5,11 @@ class triangle_snake {
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
 
-        this.R = 180
+        this.R = 216
         this.gui_folder_draw_options.add(this, 'R').onChange(function (v) { cvs.draw() }).min(10).step(1)
-        this.no_circles = 100
+        this.R2 = 350
+        this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() }).min(10).step(1)
+        this.no_circles = 160
         this.gui_folder_draw_options.add(this, 'no_circles').onChange(function (v) { cvs.draw() }).min(1).step(1)
         this.discretizatie = 0.0001
         this.gui_folder_draw_options.add(this, 'discretizatie').onChange(function (v) { cvs.draw() }).min(0.00001).step(0.00001)
@@ -32,6 +34,7 @@ class triangle_snake {
 
         p.clear()
         p.stroke([0, 0, 0])  // BLACK
+        p.rect(10, 10, Right-20, h-20)
         p.noFill()
 
         // Move to starting point (theta = 0)
@@ -54,10 +57,10 @@ class triangle_snake {
                 } 
             }
             let tria = this.my_triangle(theta*this.no_circles)
-            let x = Middle + x_offset + this.R*tria[0]
+            let x = Middle + x_offset + this.R2*tria[0]
             // let x = Middle + this.R*p.sin(theta) + this.R*p.sin(theta*this.no_circles-p.PI)
             let y_offset   = 2*this.R * (1-2*theta)
-            let y = Middle + y_offset + this.R*tria[1]
+            let y = Middle + y_offset + this.R2*tria[1]
             p.vertex(x,y)
 
         }
@@ -84,7 +87,7 @@ class triangle_snake {
             y = 0.86602540378443864676372317075294 * (1- p)   // sqrt(3)/2
         }
         x = x-0.5
-        y = y - 0.28867513459481288225457439025098 // 0.5*sqrt(1/3)
+        y = y - 0.4 
         return [x,y]
     }
 
