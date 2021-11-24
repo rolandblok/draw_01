@@ -61,9 +61,6 @@ class triangle_snake {
             // let x = Middle + this.R*p.sin(theta) + this.R*p.sin(theta*this.no_circles-p.PI)
             let y_offset   = 2*this.R * (1-2*theta)
             let y = Middle + y_offset + this.R2*tria[1]
-            if ((Object.is(x, NaN)) || (Object.is(y, NaN))) {
-                console.log("kuk")
-            }
             p.vertex(x,y)
             no_vertices ++
 
@@ -103,9 +100,6 @@ class triangle_snake {
         }
         x = x - 0.5
         y = y - 0.4 
-        if ((Object.is(x, NaN)) || (Object.is(y, NaN))) {
-            console.log("kuk")
-        }
         return [x,y]
     }
 

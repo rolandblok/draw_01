@@ -1,3 +1,4 @@
+
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix
 const FLOATING_POINT_ACCURACY = 1.0e-10
 const X = 0
@@ -16,6 +17,12 @@ const segment_intersect2=(a,b,d,c)=>{
     c=((c[0]-d[0])*(a[1]-d[1])-(c[1]-d[1])*(a[0]-d[0]))/e;
     d=((b[0]-a[0])*(a[1]-d[1])-(b[1]-a[1])*(a[0]-d[0]))/e;
     return 0<=c&&1>=c&&0<=d&&1>=d?[a[0]+c*(b[0]-a[0]),a[1]+c*(b[1]-a[1])]:false;
+}
+const transform2=(v,M)=>{
+    const d=new Array(2);
+    d[0] = v[0] * M[0] + v[1] * M[2]
+    d[1] = v[0] * M[1] + v[1] * M[3]
+    return d;
 }
 // vec3 functions
 const scale3=(v,b)=>[v[0]*b,v[1]*b,v[2]*b];
@@ -134,4 +141,12 @@ const insideTriangle=(p1,p2,p3,p)=>{
     let area = triangleArea2(p1,p2,p3)
     let arear = triangleArea2(p,p2,p3) + triangleArea2(p1,p,p3)+triangleArea2(p1,p2,p)
     return (arear - area) <= FLOATING_POINT_ACCURACY
+}
+const rot2=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
+    let R = new Array(4)
+    R[0] = Math.cos(phi)
+    R[1] = -Math.sin(phi)
+    R[2] = -R[1]
+    R[3] = R[0]
+    return R
 }
