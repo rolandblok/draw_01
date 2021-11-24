@@ -24,7 +24,7 @@ class spirograph {
     }
 
     draw(p) {
-
+        let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
         let Left = 0
@@ -47,10 +47,11 @@ class spirograph {
             x = Middle + this.R * ((1-k)*p.cos(theta) + this.l*k*p.cos(((1-k)*theta/k)))
             y = Middle + this.R * ((1-k)*p.sin(theta) + this.l*k*p.sin(((1-k)*theta/k)))
             p.vertex(x,y)
+            no_vertices++
         }
       
         p.endShape()
-        return
+        return no_vertices
     }
 
 }

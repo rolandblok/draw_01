@@ -58,7 +58,8 @@ settings.downloadSvg=()=> {
 }
 
 gui.add(settings, 'downloadSvg')
-
+settings.no_vertices = 0
+gui.add(settings, 'no_vertices').listen()
 
 let sketch = function(p) {
   p.setup = function () {
@@ -81,8 +82,9 @@ let sketch = function(p) {
   p.draw = function () {
     if (!setup_done) return
     
+
     if (current_drawer != 0) {
-      current_drawer.draw(p)
+      settings.no_vertices = current_drawer.draw(p)
     }
   }
 

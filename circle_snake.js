@@ -23,7 +23,7 @@ class circle_snake {
     }
 
     draw(p) {
-
+        let no_vertices = 0 
         let w = window.innerWidth
         let h = window.innerHeight
         let Left = 0
@@ -60,11 +60,12 @@ class circle_snake {
             let y_offset   = 2*this.R * (1-2*theta/p.TWO_PI)
             let y = Middle + y_offset + this.R*p.cos(theta*this.no_circles+p.PI)
             p.vertex(x,y)
+            no_vertices ++
 
         }
       
         p.endShape()
-        return
+        return no_vertices
     }
 
 }

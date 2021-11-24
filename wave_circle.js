@@ -18,7 +18,7 @@ class wave_circle {
     }
 
     draw(p) {
-
+        let no_vertices = 0 
         let w = window.innerWidth
         let h = window.innerHeight
         let Left = 0
@@ -50,13 +50,15 @@ class wave_circle {
                 for (let x = left; x < right; x++) {
                     let S = y + 0.4 * this.settings.line_width * p.sin(p.TWO_PI * (x - left) * freq / width)
                     p.vertex(x, S)
+                    no_vertices ++
                 }
                 p.endShape()
             } else {
                 // lines
                 p.line(Left, y, Right, y)
+                no_vertices += 2
             }
         }
-        return
+        return no_vertices
     }
 }

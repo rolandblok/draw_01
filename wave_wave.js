@@ -31,7 +31,7 @@ class wave_wave {
     }
 
     draw(p) {
-
+        let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
         let Left = 0
@@ -53,11 +53,12 @@ class wave_wave {
             for (let x = Left; x < Right; x+=10) {
                 let S = y + this.settings.sin_scale * this.settings.line_width * p.sin(p.TWO_PI * this.settings.main_phase*0.001* (x+ph_offset+ph_offset2))
                 p.vertex(x, S)
+                no_vertices++
 
             }
             p.endShape()
         }
-        return
+        return no_vertices
     }
 
 }
