@@ -7,7 +7,7 @@ class block_snake {
 
         this.R = 200
         this.gui_folder_draw_options.add(this, 'R').onChange(function (v) { cvs.draw() }).min(10).step(1)
-        this.R2 = 380
+        this.R2 = 320
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() }).min(10).step(1)
         this.no_blocks = 100
         this.gui_folder_draw_options.add(this, 'no_blocks').onChange(function (v) { cvs.draw() }).min(1).step(1)
@@ -16,7 +16,7 @@ class block_snake {
         this.rotate = false
         this.gui_folder_draw_options.add(this, 'rotate').onChange(function (v) { cvs.draw() })
         this.angle = Math.PI/4
-        this.gui_folder_draw_options.add(this, 'angle').onChange(function (v) { cvs.draw() }).step(0.1)
+        this.gui_folder_draw_options.add(this, 'angle').onChange(function (v) { cvs.draw() }).step(0.01)
         this.sinus_snake = true
         this.gui_folder_draw_options.add(this, 'sinus_snake').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.open()
