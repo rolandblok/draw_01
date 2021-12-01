@@ -20,6 +20,7 @@ class circle_sinus {
         this.gui_folder_draw_options.add(this, 'setting2')
         this.gui_folder_draw_options.add(this, 'setting3')
         this.gui_folder_draw_options.add(this, 'setting4')
+        this.gui_folder_draw_options.add(this, 'setting5')
         this.gui_folder_draw_options.add(this, 'rando')
         this.gui_folder_draw_options.open()
 
@@ -67,6 +68,17 @@ class circle_sinus {
         this.freq = 7
         this.delay = 0.015
         this.no_revelations = 93
+        this.discretizatie = 250
+        cvs.draw() 
+    }
+    setting5() {
+        this.R1 = 100
+        this.R2 = 586
+        this.S1 = 35
+        this.S2 = 19
+        this.freq = 3
+        this.delay = 0.129
+        this.no_revelations = 41
         this.discretizatie = 250
         cvs.draw() 
     }
