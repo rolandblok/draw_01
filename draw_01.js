@@ -14,8 +14,8 @@ var uniqueID = (function() {
 
 var gui = new dat.GUI();
 var settings = []
-settings.draw_modes = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 'triangle_snake','block_snake']
-settings.draw_mode = settings.draw_modes[6]
+settings.draw_modes = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 'triangle_snake','block_snake', 'circle_sinus']
+settings.draw_mode = settings.draw_modes[7]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 var setup_done = false
 
@@ -123,6 +123,8 @@ function set_draw_mode() {
     current_drawer = new triangle_snake(gui,cvs)
   } else if (settings.draw_mode == 'block_snake'){
     current_drawer = new block_snake(gui,cvs)
+  } else if (settings.draw_mode == 'circle_sinus'){
+    current_drawer = new circle_sinus(gui,cvs)
   } 
 
   cvs.draw()
