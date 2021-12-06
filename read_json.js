@@ -1,15 +1,22 @@
+
 class read_json {
 
     constructor(gui,cvs) {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
-        this.setting1()
+        this.setting_test()
 
-        this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(0).step(1).listen()
-        this.gui_folder_draw_options.add(this, 'file_name')
+        this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.kader = true
-        this.gui_folder_draw_options.add(this,'load_start')
+        this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
+        this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
+        this.gui_folder_draw_options.add(this,'load_json')
+        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
+        this.gui_folder_defaults.add(this, 'setting_test')
+        this.gui_folder_defaults.add(this, 'setting_hoogtekaart')
+        this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
 
@@ -21,11 +28,17 @@ class read_json {
             console.log("load done")
             let my_data = request.responseText;
             my_obj.my_data = JSON.parse(my_data)
+
+            if (my_obj.do_centre_and_scale) {
+                my_obj.centre_and_scale();
+            }
+
+
             cvs.draw()
         }
     }
 
-    load_start() {
+    load_json() {
         console.log("load start")
         let  request = new XMLHttpRequest();
         //  request.open('GET', 'http://192.168.1.241:8080/coordinates?x='+coord.x+"&y="+coord.y+"&z="+zoom+"&r="+radius);
@@ -36,12 +49,22 @@ class read_json {
   
     }
 
-    setting1() {
-        this.R1 = 104
+    setting_test() {
         this.my_data = []
         this.file_name = "data/data.json"
+        this.z_as_hoogtekaart = false;
+        this.do_centre_and_scale = false
+        this.z_scale = 1
+        this.load_json()
+    }
+    setting_hoogtekaart() {
+        this.my_data = []
+        this.file_name = "data/hoogtekaart.json"
+        this.z_as_hoogtekaart = true;
+        this.do_centre_and_scale = true
+        this.z_scale = 0.01
+        this.load_json()
         
-        cvs.draw() 
     }
     
 
@@ -65,14 +88,36 @@ class read_json {
         }
         p.noFill()
 
+        let latest_height = new LatestHeight()
+
         if (this.my_data.length > 0) {
             for (let my_shape of this.my_data) {
+                let shape_active = true
                 p.beginShape()
                 for (let my_vertex of my_shape) {
-                    p.vertex(Middle + my_vertex[0], Middle + my_vertex[1])
-                    no_vertices ++
+                    let y_vertex = 0
+                    if (this.z_as_hoogtekaart) {
+                        y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
+
+                        if (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex)) {
+                            if (!shape_active) {
+                                p.beginShape()
+                                shape_active = true
+                            }
+                            p.vertex( my_vertex[X],  y_vertex)
+                            no_vertices ++
+                        } else {
+                            p.endShape()
+                            shape_active = false
+                        }
+                    } else {
+                        p.vertex( my_vertex[X],  my_vertex[Y])
+                        no_vertices ++
+                    }
                 }
-                p.endShape()
+                if (shape_active) {
+                    p.endShape()
+                }
             }
         }
 
@@ -92,6 +137,48 @@ class read_json {
         return no_vertices
     }
 
+
+    centre_and_scale() {
+        if (this.my_data.length > 0) {
+            let x_min = this.my_data[0][0][0]
+            let x_max = x_min
+            let y_min = this.my_data[0][1][0]
+            let y_max = y_min
+            for (const shape of this.my_data) {
+                for (const V of shape) {
+                    if (V[0] < x_min ) x_min = V[0]
+                    if (V[0] > x_max ) x_max = V[0]
+                    if (V[1] < y_min ) y_min = V[1]
+                    if (V[1] > y_max ) y_max = V[1]
+                }
+            }
+
+            let scale_x = window.innerHeight / (x_max - x_min) 
+            let scale_y = window.innerHeight / (y_max - y_min)
+            scale_x = 0.9*Math.min(scale_x, scale_y)
+            scale_y = scale_x
+
+            var new_shapes = []
+            for (const shape of this.my_data) {
+                let new_shape = []
+                for (const V of shape) {
+                    let new_V = Array(3)
+                    new_V[0] = 0.05 * window.innerHeight + (V[0] - x_min) * scale_x
+                    new_V[1] = 0.95 * window.innerHeight - (V[1] - y_min) * scale_y
+                    if (V.length == 3) new_V[2] = V[2]
+                    new_shape.push(new_V)
+                }
+                new_shapes.push(new_shape)
+            }
+            new_shapes.reverse()
+            this.my_data = new_shapes
+        }
+
+
+        cvs.draw() 
+        return
+    }
+
     /**
      * sinus circle around zero, radius R, sinus extra scale S, sinus freq and phi
      * @param {*} R 
@@ -107,5 +194,26 @@ class read_json {
         y = R * Math.cos(phi)
         return [x,y]
     }
+}
 
+
+class LatestHeight {
+    constructor(){
+        this.ys = {} // dict with height (y) values. Index : x,  Resolution : pixel. 
+    }
+
+    check_vis_and_add_point(Px, Py) {
+        let vis = false
+        let x = Px.toFixed(3)
+        if (this.ys[x]) {  // check if exists
+            if (Py <= this.ys[x]) {
+                this.ys[x] = Py
+                vis = true
+            } 
+        } else { // doesn't exist : add
+            this.ys[x] = Py
+            vis = true
+        }
+        return vis
+    }
 }
