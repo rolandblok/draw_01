@@ -95,6 +95,18 @@ let sketch = function(p) {
       p.save()
     }
   }
+  p.keyPressed = function(event) {
+    console.log("key " + event.key)
+    if (event.key === 'p') {
+      console.log('p')
+    } else if (event.key === '=') {
+      current_drawer.draw_plus()
+    } else if (event.key === '-') {
+      current_drawer.draw_min()
+    }
+  
+  }
+  
 
 }
 
@@ -143,13 +155,6 @@ function mouseDragged(event) {
 } 
 function mousePressed(event) {
   mouseDragged(event)
-}
-function keyPressed(event) {
-  console.log("key " + event.key)
-  if (event.key === 'p') {
-    console.log('p')
-  } 
-
 }
 
 

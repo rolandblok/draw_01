@@ -6,11 +6,14 @@ class read_json {
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
         this.setting_test()
+        this.draw_max = 1000000
 
         this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.kader = true
+        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
+        this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
         this.gui_folder_draw_options.add(this,'load_json')
         this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
@@ -67,6 +70,17 @@ class read_json {
         
     }
     
+    draw_plus() {
+        this.draw_max += 10
+        cvs.draw()
+    }
+    draw_min() {
+        this.draw_max -= 10
+        if (this.draw_max < 1) {
+            this.draw_max = 1
+        }
+        cvs.draw()
+    }
 
     close() {
         this.gui.removeFolder('wave wave draw options')
@@ -106,6 +120,10 @@ class read_json {
                             }
                             p.vertex( my_vertex[X],  y_vertex)
                             no_vertices ++
+                            if (no_vertices > this.draw_max) {
+                                p.endShape()
+                                return
+                            }
                         } else {
                             p.endShape()
                             shape_active = false
@@ -113,6 +131,10 @@ class read_json {
                     } else {
                         p.vertex( my_vertex[X],  my_vertex[Y])
                         no_vertices ++
+                        if (no_vertices > this.draw_max) {
+                            p.endShape()
+                            return
+                        }
                     }
                 }
                 if (shape_active) {
