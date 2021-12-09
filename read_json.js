@@ -5,6 +5,8 @@ class read_json {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
+
+
         this.setting_test()
         this.draw_max = 1000000
 
@@ -52,6 +54,7 @@ class read_json {
   
     }
 
+
     setting_test() {
         this.my_data = []
         this.file_name = "data/data.json"
@@ -87,6 +90,8 @@ class read_json {
     }
 
     draw(p) {
+        console.log("roland draws b " + this.bgc)
+        console.log("roland draws f " + this.fgc)
         let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
@@ -94,13 +99,12 @@ class read_json {
         let Middle = h / 2
         let Right = h
 
-        
         p.clear()
-        p.stroke([0, 0, 0])  // BLACK
+        p.stroke([0,0,0]) 
+        p.noFill()
         if (this.kader) {
             p.rect(10, 10, Right-20, h-20)
         }
-        p.noFill()
 
         let latest_height = new LatestHeight()
 
