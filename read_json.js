@@ -115,6 +115,11 @@ class read_json {
                 for (let my_vertex of my_shape) {
                     let y_vertex = 0
                     if (this.z_as_hoogtekaart) {
+                        if (my_vertex[Z] < 0)  { 
+                            p.stroke([0, 0, 255]) 
+                        } else {
+                            p.stroke([0, 0, 0]) 
+                        }
                         y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
 
                         if (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex)) {
@@ -126,7 +131,7 @@ class read_json {
                             no_vertices ++
                             if (no_vertices > this.draw_max) {
                                 p.endShape()
-                                return
+                                return no_vertices
                             }
                         } else {
                             p.endShape()
@@ -137,7 +142,7 @@ class read_json {
                         no_vertices ++
                         if (no_vertices > this.draw_max) {
                             p.endShape()
-                            return
+                            return no_vertices
                         }
                     }
                 }
@@ -194,6 +199,7 @@ class read_json {
                     if (V.length == 3) new_V[2] = V[2]
                     new_shape.push(new_V)
                 }
+                new_shape.reverse()
                 new_shapes.push(new_shape)
             }
             new_shapes.reverse()
