@@ -9,6 +9,7 @@ class read_json {
 
         this.setting_test()
         this.draw_max = 1000000
+        this.do_average_per_pixel = true
 
         this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.kader = true
@@ -16,6 +17,7 @@ class read_json {
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
+        this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
         this.gui_folder_draw_options.add(this,'load_json')
         this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
@@ -65,7 +67,7 @@ class read_json {
     }
     setting_hoogtekaart() {
         this.my_data = []
-        this.file_name = "data/hoogtekaart.json"
+        this.file_name = "data/hoogtekaart25.json"
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
         this.z_scale = 0.01
@@ -90,8 +92,6 @@ class read_json {
     }
 
     draw(p) {
-        console.log("roland draws b " + this.bgc)
-        console.log("roland draws f " + this.fgc)
         let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
@@ -116,9 +116,9 @@ class read_json {
                     let y_vertex = 0
                     if (this.z_as_hoogtekaart) {
                         if (my_vertex[Z] < 0)  { 
-                            p.stroke([0, 0, 255]) 
+                            // p.stroke([0, 0, 255]) 
                         } else {
-                            p.stroke([0, 0, 0]) 
+                            // p.stroke([0, 0, 0]) 
                         }
                         y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
 
@@ -134,8 +134,10 @@ class read_json {
                                 return no_vertices
                             }
                         } else {
-                            p.endShape()
-                            shape_active = false
+                            if(shape_active) {
+                                p.endShape()
+                                shape_active = false
+                            }
                         }
                     } else {
                         p.vertex( my_vertex[X],  my_vertex[Y])
@@ -171,6 +173,8 @@ class read_json {
 
     centre_and_scale() {
         if (this.my_data.length > 0) {
+
+            // find the min and max values
             let x_min = this.my_data[0][0][0]
             let x_max = x_min
             let y_min = this.my_data[0][1][0]
@@ -189,6 +193,7 @@ class read_json {
             scale_x = 0.9*Math.min(scale_x, scale_y)
             scale_y = scale_x
 
+            // move the image, within the border. Reverse y plane
             var new_shapes = []
             for (const shape of this.my_data) {
                 let new_shape = []
@@ -204,8 +209,41 @@ class read_json {
             }
             new_shapes.reverse()
             this.my_data = new_shapes
-        }
 
+            if (this.do_average_per_pixel) {
+                // average the x values per pixel to prevent save mega files
+                var new_shapes_av = []
+                for (const shape of new_shapes) {
+                    let new_shape_sums_dict = {}         // store in dict, so we can sum all values with same x
+                    for (const V of shape) {
+                        let x_fl = Math.floor(V[0])      // make an index of the x floored
+                        if (x_fl in new_shape_sums_dict) {  // if it already exists: add
+                            if (V.length == 3) new_shape_sums_dict[x_fl][2] += V[2]
+                            new_shape_sums_dict[x_fl][4] = new_shape_sums_dict[x_fl][4] + 1
+                        } else {                            // this key is new: make a new one
+                            new_shape_sums_dict[x_fl] = new Array(4).fill(0) // we will store the sum and count (item 4)
+                            new_shape_sums_dict[x_fl][0] = V[0]
+                            new_shape_sums_dict[x_fl][1] = V[1]
+                            if (V.length == 3) new_shape_sums_dict[x_fl][2] = V[2]
+                            new_shape_sums_dict[x_fl][4] = 1
+                        }
+                    }
+
+                    // we now have the summed V's, let's average them (it has to be two loops, otherwise I will miss the last items.)
+                    let new_shape_av = []
+                    for (const i in new_shape_sums_dict) {
+                        let new_V_av = new Array(3)
+                        new_V_av[0] =  new_shape_sums_dict[i][0] 
+                        new_V_av[1] =  new_shape_sums_dict[i][1] 
+                        new_V_av[2] =  new_shape_sums_dict[i][2] / new_shape_sums_dict[i][4] 
+                        new_shape_av.push(new_V_av)
+                    }
+
+                    new_shapes_av.push(new_shape_av)
+                }
+                this.my_data = new_shapes_av
+            }
+        }
 
         cvs.draw() 
         return
@@ -236,7 +274,7 @@ class LatestHeight {
 
     check_vis_and_add_point(Px, Py) {
         let vis = false
-        let x = Px.toFixed(3)
+        let x = Px.toFixed()
         if (this.ys[x]) {  // check if exists
             if (Py <= this.ys[x]) {
                 this.ys[x] = Py
