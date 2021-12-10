@@ -35,24 +35,6 @@ addEventListener("resize", this.resize, false);
 window.addEventListener("focus", function(event) { console.log( "window has focus"); paused = false }, false);
 window.addEventListener("blur", function(event) { console.log( "window lost focus");paused = true }, false);
 
-// settings.downloadSvg=()=>
-// {
-//     let svgElement = document.getElementsByTagName('svg')[0];
-//     let svg = svgElement.outerHTML;
-//     let file = new Blob([svg], { type: 'plain/text' });
-//     let a = document.createElement("a"), url = URL.createObjectURL(file);
-
-//     a.href = url;
-//     a.download = 'exported.svg';    
-//     document.body.appendChild(a);
-//     a.click();
-
-//     setTimeout(function() 
-//     {
-//         document.body.removeChild(a);
-//         window.URL.revokeObjectURL(url);  
-//     }, 0); 
-// }
 settings.downloadSvg=()=> {
   console.log("save")
   svg.save_canvas()

@@ -28,6 +28,9 @@ class sphere_band {
         this.gui_folder_draw_options.add(this,'loop').onChange(function (v) { cvs.draw() })
         this.loop_speed = 0.1
         this.gui_folder_draw_options.add(this,'loop_speed').onChange(function (v) { cvs.draw() }).min(0.01).step(.01).listen()
+
+        this.capture_on = false
+        this.gui_folder_draw_options.add(this,'capture_this')
         
 
         this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
@@ -37,8 +40,27 @@ class sphere_band {
         this.gui_folder_draw_options.open()
 
 
-
+        this.capturer = new CCapture({
+            framerate: 5,
+            format: "png",
+            name: "movie",
+            quality: 100,
+            verbose: true,
+          });
+    
     }
+
+    capture_this() {
+        // https://stubborncode.com/posts/how-to-export-images-and-animations-from-p5-js/
+        if (!this.capture_on) {
+            cvs.resizeCanvas(1024,1024)  // https://stackoverflow.com/questions/48036719/p5-js-resize-canvas-height-when-div-changes-height
+            this.capture_on = true
+            this.capturer.start()
+            this.loop = true
+            cvs.draw()
+        }
+    }
+
 
     close() {
         this.gui.removeFolder('wave wave draw options')
@@ -84,8 +106,8 @@ class sphere_band {
 
     draw(p) {
         let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
+        let w = p.width
+        let h = p.height
         let Left = 0
         let Middle = h / 2
         let Right = h
@@ -102,6 +124,10 @@ class sphere_band {
 
 
         p.clear()
+        p.stroke([255,255,255]) 
+        p.fill([255,255,255])
+        p.rect(0,0,w,h)
+
         p.stroke([0,0,0]) 
         p.noFill()
         if (this.kader) {
@@ -110,9 +136,12 @@ class sphere_band {
 
         p.randomSeed(this.randseed)
 
+        this.frame = 0
+
         let y_edge_offset = 100
         let y_range = h - 2 * y_edge_offset
         for (let l = 0; l < this.no_lines; l++) {
+
             p.beginShape()
             let rand_offset = 0
             for (let i = 0; i < this.discretizatie; i ++) {
@@ -143,6 +172,19 @@ class sphere_band {
             }
             p.endShape()
         }
+
+        if (this.capture_on) {
+            this.capturer.capture(cvs.canvas)
+            if (this.loop_t * this.loop_speed > p.TWO_PI) {
+                this.capturer.stop()
+                this.capturer.save()
+                this.loop = false
+                p.noLoop()
+                this.capture_on = false
+                p.resize(window.innerWidth, window.innerHeight)
+            }
+        }
+
 
         return no_vertices
     }
