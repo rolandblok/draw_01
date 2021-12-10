@@ -5,11 +5,8 @@ pen writer drawingsz
 
 
 Used Libs :
-[CCapture.js](https://github.com/spite/ccapture.js/)
-
-[dat.gui](https://github.com/dataarts/dat.gui)
-
-[p5js](https://github.com/processing/p5.js/)
-
+[CCapture.js](https://github.com/spite/ccapture.js/) - 
+[dat.gui](https://github.com/dataarts/dat.gui) - 
+[p5js](https://github.com/processing/p5.js/) - 
 [p5svg](https://github.com/zenozeng/p5.js-svg)
 
