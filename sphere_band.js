@@ -59,6 +59,7 @@ class sphere_band {
             this.loop = true
             cvs.draw()
         }
+        // ffmpeg -framerate 60  -i %07d.png -vf format=yuv420p movie.mp4
     }
 
 
@@ -126,7 +127,7 @@ class sphere_band {
         p.clear()
         p.stroke([255,255,255]) 
         p.fill([255,255,255])
-        p.rect(0,0,w,h)
+        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
 
         p.stroke([0,0,0]) 
         p.noFill()
