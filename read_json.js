@@ -71,6 +71,8 @@ class read_json {
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
         this.z_scale = 0.01
+        this.kader = false
+
         this.load_json()
         
     }
