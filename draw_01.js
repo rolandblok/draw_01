@@ -14,7 +14,8 @@ var uniqueID = (function() {
 
 var gui = new dat.GUI();
 var settings = []
-settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 'triangle_snake','block_snake', 'circle_sinus', 'read_json']
+settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
+                        'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 var setup_done = false
@@ -34,24 +35,6 @@ addEventListener("resize", this.resize, false);
 window.addEventListener("focus", function(event) { console.log( "window has focus"); paused = false }, false);
 window.addEventListener("blur", function(event) { console.log( "window lost focus");paused = true }, false);
 
-// settings.downloadSvg=()=>
-// {
-//     let svgElement = document.getElementsByTagName('svg')[0];
-//     let svg = svgElement.outerHTML;
-//     let file = new Blob([svg], { type: 'plain/text' });
-//     let a = document.createElement("a"), url = URL.createObjectURL(file);
-
-//     a.href = url;
-//     a.download = 'exported.svg';    
-//     document.body.appendChild(a);
-//     a.click();
-
-//     setTimeout(function() 
-//     {
-//         document.body.removeChild(a);
-//         window.URL.revokeObjectURL(url);  
-//     }, 0); 
-// }
 settings.downloadSvg=()=> {
   console.log("save")
   svg.save_canvas()
@@ -139,6 +122,8 @@ function set_draw_mode() {
     current_drawer = new circle_sinus(gui,cvs)
   } else if (settings.draw_mode == 'read_json'){
     current_drawer = new read_json(gui,cvs)
+  } else if (settings.draw_mode == 'sphere_band'){
+    current_drawer = new sphere_band(gui,cvs)
   }
 
   cvs.draw()

@@ -1,3 +1,12 @@
 # draw_01
 pen writer drawingsz
-http://raw.githack.com/rolandblok/draw_01/master/index.html
+[run githack](http://raw.githack.com/rolandblok/draw_01/master/index.html)
+
+
+
+Used Libs :
+[CCapture.js](https://github.com/spite/ccapture.js/) - 
+[dat.gui](https://github.com/dataarts/dat.gui) - 
+[p5js](https://github.com/processing/p5.js/) - 
+[p5svg](https://github.com/zenozeng/p5.js-svg)
+
