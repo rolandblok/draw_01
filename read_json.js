@@ -11,10 +11,13 @@ class read_json {
         this.draw_max = 1000000
         this.do_average_per_pixel = true
 
+        this.map_level = 'all'
+
         this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.kader = true
         this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive']).onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
@@ -94,6 +97,7 @@ class read_json {
     }
 
     draw(p) {
+        console.log("draw")
         let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
@@ -116,15 +120,17 @@ class read_json {
                 p.beginShape()
                 for (let my_vertex of my_shape) {
                     let y_vertex = 0
+                    let map_level_draw = true
                     if (this.z_as_hoogtekaart) {
-                        if (my_vertex[Z] < 0)  { 
-                            // p.stroke([0, 0, 255]) 
-                        } else {
-                            // p.stroke([0, 0, 0]) 
+                        if ((my_vertex[Z] < 0) && (this.map_level === 'positive' )  ||
+                            (my_vertex[Z] > 0) && (this.map_level === 'negative' )     ) { 
+                                map_level_draw = false
+                                console.log("asdf " + map_level_draw)
                         }
+
                         y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
 
-                        if (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex)) {
+                        if ((map_level_draw) && (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex))) {
                             if (!shape_active) {
                                 p.beginShape()
                                 shape_active = true
@@ -212,21 +218,21 @@ class read_json {
             new_shapes.reverse()
             this.my_data = new_shapes
 
+            // average the x values per pixel to prevent save mega files
             if (this.do_average_per_pixel) {
-                // average the x values per pixel to prevent save mega files
                 var new_shapes_av = []
                 for (const shape of new_shapes) {
                     let new_shape_sums_dict = {}         // store in dict, so we can sum all values with same x
                     for (const V of shape) {
                         let x_fl = Math.floor(V[0])      // make an index of the x floored
                         if (x_fl in new_shape_sums_dict) {  // if it already exists: add
-                            if (V.length == 3) new_shape_sums_dict[x_fl][2] += V[2]
+                            if (V.length == 3) new_shape_sums_dict[x_fl][Z] += V[Z]
                             new_shape_sums_dict[x_fl][4] = new_shape_sums_dict[x_fl][4] + 1
                         } else {                            // this key is new: make a new one
                             new_shape_sums_dict[x_fl] = new Array(4).fill(0) // we will store the sum and count (item 4)
-                            new_shape_sums_dict[x_fl][0] = V[0]
-                            new_shape_sums_dict[x_fl][1] = V[1]
-                            if (V.length == 3) new_shape_sums_dict[x_fl][2] = V[2]
+                            new_shape_sums_dict[x_fl][X] = V[X]
+                            new_shape_sums_dict[x_fl][Y] = V[Y]
+                            if (V.length == 3) new_shape_sums_dict[x_fl][Z] = V[Z]
                             new_shape_sums_dict[x_fl][4] = 1
                         }
                     }

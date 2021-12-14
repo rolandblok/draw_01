@@ -16,7 +16,7 @@ var gui = new dat.GUI();
 var settings = []
 settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band']
-settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
+settings.draw_mode = settings.draw_modes[settings.draw_modes.length-2]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 var setup_done = false
 
