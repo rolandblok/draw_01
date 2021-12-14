@@ -5,12 +5,14 @@ const X = 0
 const Y = 1
 const Z = 2
 // vec2 functions
-const equal2=(a,b)=>0.001>dist_sqr2(a,b);
-const scale2=(a,b)=>[a[0]*b,a[1]*b];
-const add2=(a,b)=>[a[0]+b[0],a[1]+b[1]];
-const sub2=(a,b)=>[a[0]-b[0],a[1]-b[1]];
-const dot2=(a,b)=>a[0]*b[0]+a[1]*b[1];
+const equal2=(Va,Vb)=>0.001>dist_sqr2(Va,Vb);
+const scale2=(V,b)=>[V[0]*b,V[1]*b];
+const add2=(Va,Vb)=>[Va[0]+Vb[0],Va[1]+Vb[1]];
+const sub2=(Va,Vb)=>[Va[0]-Vb[0],Va[1]-Vb[1]];
+const dot2=(Va,Vb)=>Va[0]*Vb[0]+Va[1]*Vb[1];
 const dist_sqr2=(a,b)=>(a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]);
+const len2=(a)=>Math.sqrt(dot2(a,a));
+const normalize2=(a)=>scale2(a,1/len2(a));
 const segment_intersect2=(a,b,d,c)=>{
     const e=(c[1]-d[1])*(b[0]-a[0])-(c[0]-d[0])*(b[1]-a[1]);
     if(0==e)return false;

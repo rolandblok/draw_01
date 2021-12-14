@@ -15,8 +15,8 @@ var uniqueID = (function() {
 var gui = new dat.GUI();
 var settings = []
 settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
-                        'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band']
-settings.draw_mode = settings.draw_modes[settings.draw_modes.length-2]
+                        'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines']
+settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 var setup_done = false
 
@@ -87,8 +87,16 @@ let sketch = function(p) {
     } else if (event.key === '-') {
       current_drawer.draw_min()
     }
-  
   }
+  p.mouseDragged = function(event) {
+    console.log("mouseDragged " + p.mouseButton + " " + event.clientX + " " + event.clientY)
+    current_drawer.mouse(this, event.clientX, event.clientY)
+  } 
+  p.mousePressed = function(event) {
+    // console.log("mousePressed " + event.button + " " + event.clientX + " " + event.clientY)
+    p.mouseDragged(event)
+  }
+  
   
 
 }
@@ -124,6 +132,8 @@ function set_draw_mode() {
     current_drawer = new read_json(gui,cvs)
   } else if (settings.draw_mode == 'sphere_band'){
     current_drawer = new sphere_band(gui,cvs)
+  } else if (settings.draw_mode == 'manipul_lines'){
+    current_drawer = new manipul_lines(gui,cvs)
   }
 
   cvs.draw()
@@ -135,12 +145,7 @@ function set_draw_mode() {
 // =================
 // ===MOUSE n KEYS=======
 // =================
-function mouseDragged(event) {
-  RM = random(20,100)
-} 
-function mousePressed(event) {
-  mouseDragged(event)
-}
+
 
 
 function resize() {
