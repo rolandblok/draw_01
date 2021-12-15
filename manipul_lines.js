@@ -91,7 +91,7 @@ class manipul_lines {
     }
 
 
-    draw(p) {
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0
         let w = p.width
         let h = p.height
@@ -120,12 +120,13 @@ class manipul_lines {
         }
 
         p.clear()
-        p.stroke([255,255,255]) 
-        p.fill([255,255,255])
+        p.stroke(bgc) 
+        p.fill(bgc)
         p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
 
-        p.stroke([0,0,0]) 
+        p.stroke(fgc) 
         p.noFill()
+
         if (this.kader) {
             p.rect(this.kader_width, this.kader_width, Right-2*this.kader_width, h-2*this.kader_width)
         }

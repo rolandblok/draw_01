@@ -30,7 +30,7 @@ class wave_wave {
         this.gui.removeFolder('wave wave draw options')
     }
 
-    draw(p) {
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
@@ -39,7 +39,12 @@ class wave_wave {
         let Right = h
 
         p.clear()
-        p.stroke([0, 0, 0])  // BLACK
+        p.stroke(bgc) 
+        p.fill(bgc)
+        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
+
+        p.stroke(fgc) 
+        p.noFill()
 
         let R = 0.5 * h / 1.2
 

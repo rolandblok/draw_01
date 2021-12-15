@@ -23,7 +23,7 @@ class spirograph {
         this.gui.removeFolder('wave wave draw options')
     }
 
-    draw(p) {
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0
         let w = window.innerWidth
         let h = window.innerHeight
@@ -33,11 +33,14 @@ class spirograph {
 
         let x, y, theta;
 
-
         p.clear()
-        p.stroke([0, 0, 0])  // BLACK
-        p.noFill()
+        p.stroke(bgc) 
+        p.fill(bgc)
+        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
 
+        p.stroke(fgc) 
+        p.noFill()
+        
         // Move to starting point (theta = 0)
         p.beginShape()
         

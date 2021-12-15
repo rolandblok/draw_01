@@ -5,11 +5,10 @@ class sphere_band {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
-
-
         this.setting1()
 
         this.draw_max = 1000000
+
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10).listen()
         this.kader = true
@@ -49,6 +48,8 @@ class sphere_band {
           });
     
     }
+
+
 
     capture_this() {
         // https://stubborncode.com/posts/how-to-export-images-and-animations-from-p5-js/
@@ -105,7 +106,7 @@ class sphere_band {
     }
 
 
-    draw(p) {
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0
         let w = p.width
         let h = p.height
@@ -123,14 +124,14 @@ class sphere_band {
             this.loop_t ++
         }
 
-
         p.clear()
-        p.stroke([255,255,255]) 
-        p.fill([255,255,255])
+        p.stroke(bgc) 
+        p.fill(bgc)
         p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
 
-        p.stroke([0,0,0]) 
+        p.stroke(fgc) 
         p.noFill()
+        
         if (this.kader) {
             p.rect(10, 10, Right-20, h-20)
         }

@@ -18,6 +18,9 @@ settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 'circle_lines']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
+settings.invert_color = false
+gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
+
 var setup_done = false
 
 dat.GUI.prototype.removeFolder = function(name) {
@@ -35,11 +38,13 @@ addEventListener("resize", this.resize, false);
 window.addEventListener("focus", function(event) { console.log( "window has focus"); paused = false }, false);
 window.addEventListener("blur", function(event) { console.log( "window lost focus");paused = true }, false);
 
+
 settings.downloadSvg=()=> {
   console.log("save")
   svg.save_canvas()
 }
 
+settings.invert = false
 gui.add(settings, 'downloadSvg')
 settings.no_vertices = 0
 gui.add(settings, 'no_vertices').listen()
@@ -67,7 +72,18 @@ let sketch = function(p) {
     
 
     if (current_drawer != 0) {
-      settings.no_vertices = current_drawer.draw(p)
+
+      if (settings.invert_color) {
+        fgc = [255,255,255]
+        bgc = [0,0,0]
+      } else {
+        fgc = [0,0,0]
+        bgc = [255,255,255]
+      }
+
+
+
+      settings.no_vertices = current_drawer.draw(p, fgc=fgc, bgc=bgc)
     }
   }
 

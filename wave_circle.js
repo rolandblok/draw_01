@@ -17,7 +17,11 @@ class wave_circle {
         this.gui.removeFolder('wave circle draw options')
     }
 
-    draw(p) {
+    mouse(p, x,y){
+    }
+
+
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0 
         let w = window.innerWidth
         let h = window.innerHeight
@@ -26,7 +30,12 @@ class wave_circle {
         let Right = h
 
         p.clear()
-        p.stroke([0, 0, 0])  // BLACK
+        p.stroke(bgc) 
+        p.fill(bgc)
+        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
+
+        p.stroke(fgc) 
+        p.noFill()
 
         let R = 0.5 * h / 1.2
 

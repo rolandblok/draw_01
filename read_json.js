@@ -96,7 +96,7 @@ class read_json {
         this.gui.removeFolder('wave wave draw options')
     }
 
-    draw(p) {
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         console.log("draw")
         let no_vertices = 0
         let w = window.innerWidth
@@ -106,8 +106,13 @@ class read_json {
         let Right = h
 
         p.clear()
-        p.stroke([0,0,0]) 
+        p.stroke(bgc) 
+        p.fill(bgc)
+        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
+
+        p.stroke(fgc) 
         p.noFill()
+        
         if (this.kader) {
             p.rect(10, 10, Right-20, h-20)
         }
