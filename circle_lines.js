@@ -9,6 +9,12 @@ class circle_lines {
 
         this.draw_max = 1000000
 
+        this.ph1_MAX = 4* Math.PI
+        this.ph1_end_MAX = 8*  Math.PI
+        this.ph2_MAX = 4* Math.PI
+        this.ph2_end_MAX = 8* Math.PI
+        this.no_lines_MAX = 500
+
         this.gui_folder_draw_options.add(this, 'no_lines').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
         this.gui_folder_draw_options.add(this, 'ph1').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
         this.gui_folder_draw_options.add(this, 'ph1_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.1).listen()
@@ -96,11 +102,11 @@ class circle_lines {
 
     }
     rando() {
-        this.ph1 = Math.random() * 2* Math.PI
-        this.ph1_end = Math.random() *4*  Math.PI
-        this.ph2 = Math.random() * 2* Math.PI
-        this.ph2_end = Math.random() * 4* Math.PI
-        this.no_lines = 20 + Math.random()*500
+        this.ph1 = Math.random() * this.ph1_MAX
+        this.ph1_end = Math.random() *this.ph1_end_MAX
+        this.ph2 = Math.random() * this.ph2_MAX
+        this.ph2_end = Math.random() * this.ph2_end_MAX
+        this.no_lines = 20 + Math.random()*this.no_lines_MAX
 
         cvs.draw() 
     }

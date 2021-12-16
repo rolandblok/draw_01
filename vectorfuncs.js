@@ -113,10 +113,10 @@ const createPerspectiveUsingFrustum=(fovy, aspect, near, far)=>{
     left = -right;
     return createFrustum(left, right, bottom, top, near, far);
   }
-const center2dscreen=(w,h,v4)=> {
+const center2dscreen=(x,y,w,h,v4)=> {
     const d=new Float32Array(2);
-    d[0]=w/2+v4[0]
-    d[1]=h/2-v4[1]
+    d[X]=x+w/2+v4[X]
+    d[Y]=y+h/2-v4[Y]
     return d
 }
 const unitm=(n)=>{

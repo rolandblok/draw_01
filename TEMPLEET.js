@@ -70,9 +70,9 @@ class TEMPLEET {
             p.beginShape()
             for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
                         // DEBUG sinus
-                        let X = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + X[0] 
-                        let y2 = Middle + X[1]
+                        let V = this.my_circle_sinus(this.R1, theta)
+                        let x2 = Middle + V[0] 
+                        let y2 = Middle + V[1]
                         p.vertex(x2,y2)
                         no_vertices ++
             }

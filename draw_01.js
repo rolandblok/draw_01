@@ -21,6 +21,10 @@ settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
+settings.grid_x = 1
+gui.add(settings, 'grid_x').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
+settings.grid_y = 1
+gui.add(settings, 'grid_y').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
 
 var setup_done = false
 
@@ -81,9 +85,6 @@ let sketch = function(p) {
         fgc = [0,0,0]
         bgc = [255,255,255]
       }
-
-
-
       settings.no_vertices = current_drawer.draw(p, fgc=fgc, bgc=bgc)
     }
   }
