@@ -120,10 +120,11 @@ class manipul_lines {
         }
 
         p.clear()
-        p.stroke(bgc) 
-        p.fill(bgc)
-        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-
+        if (p.type === 'SCREEN') {
+            p.stroke(bgc) 
+            p.fill(bgc)
+            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
+        }
         p.stroke(fgc) 
         p.noFill()
 
