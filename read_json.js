@@ -12,12 +12,14 @@ class read_json {
         this.do_average_per_pixel = true
 
         this.map_level = 'all'
+        this.no_endShapes = 0
 
+        this.gui_folder_draw_options.add(this, 'no_endShapes').listen()
         this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.kader = true
         this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
-        this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive']).onChange(function (v) { cvs.draw() })
+        this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive','two_colors']).onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
@@ -31,6 +33,9 @@ class read_json {
 
 
 
+    }
+
+    mouse(p, x,y){
     }
 
     load_done(request, my_obj) {
@@ -118,53 +123,75 @@ class read_json {
             p.rect(10, 10, Right-20, h-20)
         }
 
-        let latest_height = new LatestHeight()
 
-        if (this.my_data.length > 0) {
-            for (let my_shape of this.my_data) {
-                let shape_active = true
-                p.beginShape()
-                for (let my_vertex of my_shape) {
-                    let y_vertex = 0
-                    let map_level_draw = true
-                    if (this.z_as_hoogtekaart) {
-                        if ((my_vertex[Z] < 0) && (this.map_level === 'positive' )  ||
-                            (my_vertex[Z] > 0) && (this.map_level === 'negative' )     ) { 
-                                map_level_draw = false
-                                console.log("asdf " + map_level_draw)
-                        }
+        let no_draws = 1
+        let org_map_level = this.map_level.slice()
+        let active_map_level = this.map_level.slice()
+        if (this.map_level === 'two_colors') {
+            active_map_level = 'negative'.slice()
+            p.stroke([0,0,255])
+            no_draws = 2
+        }
+        if (active_map_level === 'negative')
+            p.stroke([0,0,255])
 
-                        y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
-
-                        if ((map_level_draw) && (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex))) {
-                            if (!shape_active) {
-                                p.beginShape()
-                                shape_active = true
+        this.no_endShapes = 0
+        while (no_draws > 0 ) {
+            let latest_height = new LatestHeight()
+            if (this.my_data.length > 0) {
+                for (let my_shape of this.my_data) {
+                    let shape_active = true
+                    p.beginShape()
+                    for (let my_vertex of my_shape) {
+                        let y_vertex = 0
+                        let map_level_draw = true
+                        if (this.z_as_hoogtekaart) {
+                            if ((my_vertex[Z] < 0) && (active_map_level === 'positive' )  ||
+                                (my_vertex[Z] > 0) && (active_map_level === 'negative' )     ) { 
+                                    map_level_draw = false
                             }
-                            p.vertex( my_vertex[X],  y_vertex)
+
+                            y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
+
+                            if ((map_level_draw) && (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex))) {
+                                if (!shape_active) {
+                                    p.beginShape()
+                                    shape_active = true
+                                }
+                                p.vertex( my_vertex[X],  y_vertex)
+                                no_vertices ++
+                                if (no_vertices > this.draw_max) {
+                                    p.endShape()
+                                    this.no_endShapes++
+                                    return no_vertices
+                                }
+                            } else {
+                                if(shape_active) {
+                                    p.endShape()
+                                    shape_active = false
+                                }
+                            }
+                        } else {
+                            p.vertex( my_vertex[X],  my_vertex[Y])
                             no_vertices ++
                             if (no_vertices > this.draw_max) {
                                 p.endShape()
+                                this.no_endShapes++
                                 return no_vertices
                             }
-                        } else {
-                            if(shape_active) {
-                                p.endShape()
-                                shape_active = false
-                            }
-                        }
-                    } else {
-                        p.vertex( my_vertex[X],  my_vertex[Y])
-                        no_vertices ++
-                        if (no_vertices > this.draw_max) {
-                            p.endShape()
-                            return no_vertices
                         }
                     }
+                    if (shape_active) {
+                        p.endShape()
+                        this.no_endShapes++
+                    }
                 }
-                if (shape_active) {
-                    p.endShape()
-                }
+            }
+
+            no_draws --
+            if(org_map_level === 'two_colors') {
+                active_map_level = 'positive'.slice()
+                p.stroke(fgc)
             }
         }
 

@@ -24,6 +24,9 @@ class TEMPLEET {
 
 
     }
+    
+    mouse(p, x,y){
+    }
 
     close() {
         this.gui.removeFolder('wave wave draw options')
