@@ -17,14 +17,23 @@ var settings = []
 settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus']
-settings.draw_mode = settings.draw_modes[settings.draw_modes.length-5]
+settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
+settings.kader = true
+gui.add(settings, 'kader').onChange(function (v) { cvs.draw() })
 settings.grid_x = 1
 gui.add(settings, 'grid_x').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
 settings.grid_y = 1
 gui.add(settings, 'grid_y').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
+settings.grid_edge = 10
+gui.add(settings, 'grid_edge').step(1).min(1).onChange(function (v) { cvs.draw() })
+settings.regrid=()=> {
+  console.log("regrid")
+  set_draw_mode()
+}
+gui.add(settings, 'regrid')
 
 var setup_done = false
 
@@ -76,7 +85,7 @@ let sketch = function(p) {
     if (!setup_done) return
     
 
-    if (current_drawer != 0) {
+    if (current_drawers != 0) {
 
       if (settings.invert_color) {
         fgc = [255,255,255]
@@ -85,7 +94,7 @@ let sketch = function(p) {
         fgc = [0,0,0]
         bgc = [255,255,255]
       }
-      settings.no_vertices = current_drawer.draw(p, fgc=fgc, bgc=bgc)
+      settings.no_vertices = current_drawers.draw(p, fgc=fgc, bgc=bgc)
     }
   }
 
@@ -101,14 +110,16 @@ let sketch = function(p) {
     if (event.key === 'p') {
       console.log('p')
     } else if (event.key === '=') {
-      current_drawer.draw_plus()
+      current_drawers.draw_plus()
     } else if (event.key === '-') {
-      current_drawer.draw_min()
+      current_drawers.draw_min()
+    } else {
+      current_drawers.key(event.key)
     }
   }
   p.mouseDragged = function(event) {
     console.log("mouseDragged " + p.mouseButton + " " + event.clientX + " " + event.clientY)
-    current_drawer.mouse(this, event.clientX, event.clientY)
+    current_drawers.mouse(this, event.clientX, event.clientY)
   } 
   p.mousePressed = function(event) {
     // console.log("mousePressed " + event.button + " " + event.clientX + " " + event.clientY)
@@ -125,43 +136,133 @@ var svg = new p5(sketch, "hidden_div")
 svg.type = "SVG"
 
 
-var current_drawer = 0
+var current_drawers = 0
 function set_draw_mode() {
-  if (current_drawer != 0) {
-    current_drawer.close()
+  if(current_drawers != 0) {
+    current_drawers.close()
   }
-  if (settings.draw_mode == 'none') { 
-    current_drawer = 0
-  } else if (settings.draw_mode == 'wave_circle') {
-    current_drawer = new wave_circle(gui,cvs)
-  } else if (settings.draw_mode == 'wave_wave') {
-    current_drawer = new wave_wave(gui,cvs)
-  } else if (settings.draw_mode == 'spirograph') {
-    current_drawer = new spirograph(gui,cvs)
-  } else if (settings.draw_mode == 'circle_snake') {
-    current_drawer = new circle_snake(gui,cvs)
-  } else if (settings.draw_mode == 'triangle_snake'){
-    current_drawer = new triangle_snake(gui,cvs)
-  } else if (settings.draw_mode == 'block_snake'){
-    current_drawer = new block_snake(gui,cvs)
-  } else if (settings.draw_mode == 'circle_sinus'){
-    current_drawer = new circle_sinus(gui,cvs)
-  } else if (settings.draw_mode == 'read_json'){
-    current_drawer = new read_json(gui,cvs)
-  } else if (settings.draw_mode == 'sphere_band'){
-    current_drawer = new sphere_band(gui,cvs)
-  } else if (settings.draw_mode == 'manipul_lines'){
-    current_drawer = new manipul_lines(gui,cvs)
-  } else if (settings.draw_mode == 'circle_lines'){
-    current_drawer = new circle_lines(gui,cvs)
-  } else if (settings.draw_mode == 'multi_sinus'){
-    current_drawer = new multi_sinus(gui,cvs)
-  }
+  current_drawers = new DrawerSet(settings.grid_x, settings.grid_y)
 
   cvs.draw()
 }
 
 
+/**
+ * drawer store
+ */
+class DrawerSet {
+  constructor (Nx, Ny) {
+    this.drawers = Array(Nx)
+    for (let xi = 0; xi < Nx; xi ++) {
+      this.drawers[xi] = Array(Ny)
+      for (let yi = 0; yi < Ny; yi ++) {
+        let xywh = this.calc_xywh(Nx,Ny,xi, yi )
+        this.add_drawer(xywh, xi, yi)
+      }
+    }
+  }
+
+  calc_xywh(Nx,Ny, xi,yi) {
+    let xywh = {}
+    let W = window.innerHeight
+    let H = window.innerHeight
+    let D = settings.grid_edge
+    let w = (W - (Nx + 1)*D) / Nx
+    let h = (H - (Ny + 1)*D) / Ny
+    let x = (D + w) * xi + D
+    let y = (D + h) * yi + D
+    xywh['x'] = x
+    xywh['y'] = y
+    xywh['w'] = w
+    xywh['h'] = h
+    return xywh
+  }
+
+  add_drawer(xywh, xi, yi) {
+    let current_drawer = 0
+    let gui_string = " " + xi +"_" + yi
+    if (settings.draw_mode == 'wave_circle') {
+      current_drawer = new wave_circle(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'wave_wave') {
+      current_drawer = new wave_wave(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'spirograph') {
+      current_drawer = new spirograph(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'circle_snake') {
+      current_drawer = new circle_snake(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'triangle_snake'){
+      current_drawer = new triangle_snake(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'block_snake'){
+      current_drawer = new block_snake(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'circle_sinus'){
+      current_drawer = new circle_sinus(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'read_json'){
+      current_drawer = new read_json(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'sphere_band'){
+      current_drawer = new sphere_band(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'manipul_lines'){
+      current_drawer = new manipul_lines(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'circle_lines'){
+      current_drawer = new circle_lines(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'multi_sinus'){
+      current_drawer = new multi_sinus(gui, xywh, gui_string)
+    }
+    this.drawers[xi][yi] = current_drawer
+  }
+
+  draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+    p.clear()
+    if (settings.kader) {
+      p.stroke(fgc)
+      p.rect( 10,  10,  window.innerHeight - 20,  window.innerHeight-20)
+    }
+    let no_vertices = 0
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        no_vertices += drawer.draw(p,fgc, bgc)
+      }
+    }
+    return no_vertices
+  }
+
+  close() {
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.close()
+      }
+    }
+  }
+  draw_min() {
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.draw_min()
+      }
+    }
+    cvs.draw()
+  }
+  draw_plus() {
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.draw_plus()
+      }
+    }
+    cvs.draw()
+  }
+  mouse(p,x,y) {
+    if (x > window.innerHeight) return
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.mouse(p,x,y)
+      }
+    }
+  }
+  key(key) {
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.key(key)
+      }
+    }
+  }
+}
 
 
 // =================

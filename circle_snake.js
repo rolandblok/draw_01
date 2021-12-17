@@ -1,6 +1,6 @@
 class circle_snake {
 
-    constructor(gui,cvs) {
+    constructor(gui) {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 

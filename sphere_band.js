@@ -1,7 +1,7 @@
 
 class sphere_band {
 
-    constructor(gui,cvs) {
+    constructor(gui) {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
 
@@ -95,14 +95,12 @@ class sphere_band {
     
     draw_plus() {
         this.draw_max += 10
-        cvs.draw()
     }
     draw_min() {
         this.draw_max -= 10
         if (this.draw_max < 1) {
             this.draw_max = 1
         }
-        cvs.draw()
     }
 
 

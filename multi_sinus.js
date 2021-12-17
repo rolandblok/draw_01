@@ -1,17 +1,18 @@
 
 class multi_sinus {
 
-    constructor(gui,cvs) {
+    constructor(gui, xywh, sub_gui = '') {
         this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
-
-
+        this.gui_str = 'wave wave draw options' + sub_gui
+        this.gui_folder_draw_options = gui.addFolder(this.gui_str)
+        this.xywh = xywh
+        this.selected = false
+        this.wh_min = Math.min(xywh['w'], xywh['h'])
 
         this.setting1(false)
 
         this.draw_max = 1000000
 
-        this.R1 = 180
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'no_lines').onChange(function (v) { cvs.draw() }).min(10).listen()
@@ -36,26 +37,45 @@ class multi_sinus {
         this.gui_folder_defaults.add(this, 'setting2')
         this.gui_folder_defaults.add(this, 'setting3')
         this.gui_folder_defaults.add(this, 'rando')
-        this.gui_folder_defaults.open()
-        this.gui_folder_draw_options.open()
+        if(sub_gui === ' 0_0'){
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+        }
 
 
 
     }
     mouse(p, x,y){
+        let xr = this.xywh['x']
+        let yr = this.xywh['y']
+        let w = this.xywh['w']
+        let h = this.xywh['h']
+        if ((x > xr) && (x < (xr + w)) && (y > yr) && (y < (yr + h))) {
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+            this.selected = true
+        } else {
+            this.gui_folder_defaults.close()
+            this.gui_folder_draw_options.close()
+            this.selected = false
+        }
+    }
+    key(key) {
+        if ((key === 'r') && this.selected) {
+            this.rando()
+        }
     }
 
     close() {
-        this.gui.removeFolder('wave wave draw options')
+        this.gui.removeFolder(this.gui_str)
     }
     setting1(draw_now=true) {
-        this.R1 = window.innerHeight * 0.15
-        this.R2 = window.innerHeight * 0.45
-        this.R3 = window.innerHeight * 0.1
+        this.R1 = this.wh_min * 0.15
+        this.R2 = this.wh_min * 0.45
         this.no_lines = 125
         this.discretizatie = 250
         this.randseed = 0
-        this.no_sinusus = 250
+        this.no_sinusus = 50
         this.sinus_scale = 5
         this.delay_scale = 8 * Math.PI
         this.tilt_scale1 = 1
@@ -67,9 +87,8 @@ class multi_sinus {
         if(draw_now) cvs.draw()
     }
     setting2() {
-        this.R1 = window.innerHeight * 0.15
-        this.R2 = window.innerHeight * 0.45
-        this.R3 = window.innerHeight * 0.1
+        this.R1 = this.wh_min * 0.15
+        this.R2 = this.wh_min * 0.45
         this.no_lines = 105
         this.discretizatie = 250
         this.randseed = 32
@@ -79,9 +98,8 @@ class multi_sinus {
         cvs.draw()
     }
     setting3() {
-        this.R1 = window.innerHeight * 0.15
-        this.R2 = window.innerHeight * 0.45
-        this.R3 = window.innerHeight * 0.1
+        this.R1 = this.wh_min * 0.15
+        this.R2 = this.wh_min * 0.45
         this.no_lines = 93
         this.discretizatie = 250
         this.randseed = 15
@@ -101,35 +119,36 @@ class multi_sinus {
     
     draw_plus() {
         this.draw_max += 10
-        cvs.draw()
     }
     draw_min() {
         this.draw_max -= 10
         if (this.draw_max < 1) {
             this.draw_max = 1
         }
-        cvs.draw()
     }
 
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
+        let x = this.xywh['x']
+        let y = this.xywh['y']
+        let w = this.xywh['w']
+        let h = this.xywh['h']
+        let Middle_x = this.xywh['x'] + w / 2
+        let Middle_y = this.xywh['y'] + h / 2
+        let Right = this.xywh['x'] + w
+        let Bottom = this.xywh['y'] + h
 
-        p.clear()
-        p.stroke(bgc) 
-        p.fill(bgc)
-        p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-
+        if (p.type === 'SCREEN') {
+            p.stroke(bgc) 
+            p.fill(bgc)
+            p.rect(x,y,w,h)                 // make sure there is no transparant: movies will fail
+        }
         p.stroke(fgc) 
         p.noFill()
         
         if (this.kader) {
-            p.rect(10, 10, Right-20, h-20)
+            p.rect(this.xywh['x'] + 9, this.xywh['y'] + 9, w-18, h-18)
         }
 
         p.randomSeed(this.randseed)
@@ -158,7 +177,7 @@ class multi_sinus {
 
 
                 let V = this.my_circle_sinusus(R, Ss_and_Phases_and_Freqs_and_Delays, phi, S_scale = S_scale, tilt_scale = tilt_scale)
-                p.vertex(Middle + V[X], Middle + V[Y] - h_offset + l_no * h_step)
+                p.vertex(Middle_x + V[X], Middle_y + V[Y] - h_offset + l_no * h_step)
                 no_vertices ++
             }
             p.endShape()
@@ -169,8 +188,8 @@ class multi_sinus {
             for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
                         // DEBUG sinus
                         let V = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + V[0] 
-                        let y2 = Middle + V[1]
+                        let x2 = Middle_x + V[0] 
+                        let y2 = Middle_y + V[1]
                         p.vertex(x2,y2)
                         no_vertices ++
             }

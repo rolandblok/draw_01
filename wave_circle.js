@@ -3,7 +3,7 @@
 
 class wave_circle {
 
-    constructor(gui, cvs) {
+    constructor(gui) {
         this.gui = gui
         this.gui_folder_draw_options = gui.addFolder('wave circle draw options')
         this.settings = []
