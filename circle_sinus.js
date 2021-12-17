@@ -1,10 +1,10 @@
-class circle_sinus {
+class circle_sinus extends Drawer {
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui = '') {
+        super('circle sinus options',gui, xywh, sub_gui)
 
         this.setting1()
+        console.log(this.xywh)
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(0).step(1).listen()
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
@@ -14,24 +14,24 @@ class circle_sinus {
         this.gui_folder_draw_options.add(this, 'delay').onChange(function (v) { cvs.draw() }).min(0).step(.001).listen()
         this.gui_folder_draw_options.add(this, 'no_revelations').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
         this.gui_folder_draw_options.add(this, 'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
-        this.kader = true
-        this.gui_folder_draw_options.add(this, 'kader').onChange(function (v) { cvs.draw() })
-        this.gui_folder_draw_options.add(this, 'setting1')
-        this.gui_folder_draw_options.add(this, 'setting2')
-        this.gui_folder_draw_options.add(this, 'setting3')
-        this.gui_folder_draw_options.add(this, 'setting4')
-        this.gui_folder_draw_options.add(this, 'setting5')
-        this.gui_folder_draw_options.add(this, 'rando')
-        this.gui_folder_draw_options.open()
-
+        this.gui_folder_defaults.add(this, 'setting1')
+        this.gui_folder_defaults.add(this, 'setting2')
+        this.gui_folder_defaults.add(this, 'setting3')
+        this.gui_folder_defaults.add(this, 'setting4')
+        this.gui_folder_defaults.add(this, 'setting5')
+        this.gui_folder_defaults.add(this, 'rando')
+        if(sub_gui === ' 0_0'){
+            this.gui_folder_draw_options.open()
+            this.gui_folder_defaults.open()
+        }
 
     }
 
     setting1() {
-        this.R1 = 104
-        this.R2 = 500
-        this.S1 = 30
-        this.S2 = 60
+        this.R1 = 104  * this.wh_min / 1260
+        this.R2 = 500  * this.wh_min / 1260
+        this.S1 = 30  * this.wh_min / 1260
+        this.S2 = 60  * this.wh_min / 1260
         this.freq = 11
         this.delay = 0.008
         this.no_revelations = 83
@@ -39,10 +39,10 @@ class circle_sinus {
         cvs.draw() 
     }
     setting2() {
-        this.R1 = 122
-        this.R2 = 500
-        this.S1 = 31
-        this.S2 = 60
+        this.R1 = 122  * this.wh_min / 1260
+        this.R2 = 500  * this.wh_min / 1260
+        this.S1 = 31  * this.wh_min / 1260
+        this.S2 = 60  * this.wh_min / 1260
         this.freq = 11
         this.delay = 0.016
         this.no_revelations = 57
@@ -50,10 +50,10 @@ class circle_sinus {
         cvs.draw() 
     }
     setting3() {
-        this.R1 = 74
-        this.R2 = 500
-        this.S1 = 7
-        this.S2 = 78
+        this.R1 = 74  * this.wh_min / 1260
+        this.R2 = 500  * this.wh_min / 1260
+        this.S1 = 7  * this.wh_min / 1260
+        this.S2 = 78  * this.wh_min / 1260
         this.freq = 15
         this.delay = 0.016
         this.no_revelations = 57
@@ -61,10 +61,10 @@ class circle_sinus {
         cvs.draw() 
     }
     setting4() {
-        this.R1 = 277
-        this.R2 = 400
-        this.S1 = 35
-        this.S2 = 31
+        this.R1 = 277  * this.wh_min / 1260
+        this.R2 = 400  * this.wh_min / 1260
+        this.S1 = 35  * this.wh_min / 1260
+        this.S2 = 31  * this.wh_min / 1260
         this.freq = 7
         this.delay = 0.015
         this.no_revelations = 93
@@ -72,10 +72,10 @@ class circle_sinus {
         cvs.draw() 
     }
     setting5() {
-        this.R1 = 100
-        this.R2 = 586
-        this.S1 = 35
-        this.S2 = 19
+        this.R1 = 100  * this.wh_min / 1260
+        this.R2 = 586  * this.wh_min / 1260
+        this.S1 = 35  * this.wh_min / 1260
+        this.S2 = 19  * this.wh_min / 1260
         this.freq = 3
         this.delay = 0.129
         this.no_revelations = 41
@@ -83,10 +83,10 @@ class circle_sinus {
         cvs.draw() 
     }
     rando() {
-        this.R1 = Math.random() * 300
-        this.R2 = Math.random() * 500
-        this.S1 = Math.random() * 100
-        this.S2 = Math.random() * 100
+        this.R1 = Math.random() * 300  * this.wh_min / 1260
+        this.R2 = Math.random() * 500  * this.wh_min / 1260
+        this.S1 = Math.random() * 100  * this.wh_min / 1260
+        this.S2 = Math.random() * 100  * this.wh_min / 1260
         this.freq = Math.floor(Math.random() * 50)
         this.delay = Math.random()*0.05
         this.no_revelations = Math.random()*100
@@ -94,31 +94,17 @@ class circle_sinus {
         cvs.draw() 
     }
 
-
-    mouse(p, x,y){
-    }
-
-    close() {
-        this.gui.removeFolder('wave wave draw options')
+    key(key) {
+        super.key(key)
+        if ((key === 'r') && this.selected) {
+            this.rando()
+        }
     }
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
+        super.draw(p, fgc, bgc)
 
-        
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
+        let no_vertices = 0
 
         // Move to starting point (theta = 0)
 
@@ -134,26 +120,13 @@ class circle_sinus {
             for (let phi = 0; phi <= p.TWO_PI + FLOATING_POINT_ACCURACY; phi += p.TWO_PI/this.discretizatie) {
 
                 let X = this.my_circle_sinus(R, S, phi, rev*this.delay )
-                let x2 = Middle + X[0] 
-                let y2 = Middle + X[1]
-                p.vertex(x2,y2)
+                let x2 = X[0] 
+                let y2 = X[1]
+                this.vertex_middle(p, x2,y2)
                 no_vertices ++
             }
             S += S_step
             R += R_step
-            p.endShape()
-        }
-
-        if (false) {
-            p.beginShape()
-            for (let theta = 0; theta < p.TWO_PI; theta += 0.1) {
-                        // DEBUG sinus
-                        let X = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + X[0] 
-                        let y2 = Middle + X[1]
-                        p.vertex(x2,y2)
-                        no_vertices ++
-            }
             p.endShape()
         }
 

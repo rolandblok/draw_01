@@ -1,8 +1,7 @@
-class block_snake {
+class block_snake  extends Drawer {
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui = '') {
+        super('block snake options',gui, xywh, sub_gui)
 
 
         this.R = 200
@@ -24,17 +23,10 @@ class block_snake {
 
     }
 
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
-
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p, fgc, bgc)
+
         let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
 
         let my_rot
         if (this.rotate) {
@@ -42,16 +34,6 @@ class block_snake {
         } else {
             my_rot = rot2(0)
         }
-        
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
-
         // Move to starting point (theta = 0)
         p.beginShape()
 
@@ -74,27 +56,16 @@ class block_snake {
             }
             let blo = this.my_block(theta*this.no_blocks - FLOATING_POINT_ACCURACY)
             blo = transform2(blo, my_rot)
-            let x = Middle + x_offset + this.R2*blo[0]
+            let x =  x_offset + this.R2*blo[0]
             // let x = Middle + this.R*p.sin(theta) + this.R*p.sin(theta*this.no_circles-p.PI)
             let y_offset   = 2*this.R * (1-2*theta)
-            let y = Middle + y_offset + this.R2*blo[1]
-            p.vertex(x,y)
+            let y =  y_offset + this.R2*blo[1]
+            this.vertex_middle(p, x,y)
             no_vertices ++
 
         }
         p.endShape()
 
-        // p.beginShape()
-        // for (let theta = 0; theta < 1; theta += 1/8) {
-        //             // DEBUG TRIANGLES
-        //             let blo = this.my_block(theta - FLOATING_POINT_ACCURACY)
-        //             let X = transform2(blo, my_rot)
-        //             let x2 = Middle*(1 + X[0] )
-        //             let y2 = Middle*(1 + X[1] )
-        //             p.vertex(x2,y2)
-        //             no_vertices ++
-        // }
-        // p.endShape()
 
         return no_vertices
     }

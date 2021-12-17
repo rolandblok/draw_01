@@ -1,18 +1,12 @@
 
-class sphere_band {
+class sphere_band extends Drawer {
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui = '') {
+        super('sphere band options', gui, xywh, sub_gui)
 
         this.setting1()
 
-        this.draw_max = 1000000
-
-
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10).listen()
-        this.kader = true
-        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(10).listen()
         this.gui_folder_draw_options.add(this,'phase_1').onChange(function (v) { cvs.draw() }).min(.1).step(0.1).listen()
         this.gui_folder_draw_options.add(this,'no_lines').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
@@ -31,12 +25,12 @@ class sphere_band {
         this.capture_on = false
         this.gui_folder_draw_options.add(this,'capture_this')
         
-
-        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'setting2')
-        this.gui_folder_defaults.open()
-        this.gui_folder_draw_options.open()
+        if(sub_gui === ' 0_0'){
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+        }
 
 
         this.capturer = new CCapture({
@@ -48,8 +42,6 @@ class sphere_band {
           });
     
     }
-
-
 
     capture_this() {
         // https://stubborncode.com/posts/how-to-export-images-and-animations-from-p5-js/
@@ -64,9 +56,6 @@ class sphere_band {
     }
 
 
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
     setting1() {
         this.discretizatie = 1000
         this.R1 = 180
@@ -93,24 +82,11 @@ class sphere_band {
 
     }
     
-    draw_plus() {
-        this.draw_max += 10
-    }
-    draw_min() {
-        this.draw_max -= 10
-        if (this.draw_max < 1) {
-            this.draw_max = 1
-        }
-    }
-
-
+    
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p, fgc, bgc)
+
         let no_vertices = 0
-        let w = p.width
-        let h = p.height
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
 
         if (this.loop) { 
             p.loop() 
@@ -122,25 +98,12 @@ class sphere_band {
             this.loop_t ++
         }
 
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
-        
-        if (this.kader) {
-            p.rect(10, 10, Right-20, h-20)
-        }
-
         p.randomSeed(this.randseed)
 
         this.frame = 0
 
         let y_edge_offset = 100
-        let y_range = h - 2 * y_edge_offset
+        let y_range = this.h - 2 * y_edge_offset
         for (let l = 0; l < this.no_lines; l++) {
 
             p.beginShape()
@@ -155,24 +118,12 @@ class sphere_band {
                 rand_offset += p.random(-rando, rando)
 
                 let x  = 0.5 * y_range * p.sin ( p.PI * norm_i) * p.sin(this.phase_1 * norm_i - this.loop_t *this.loop_speed)
-                p.vertex(x+Middle +  rand_offset* this.max_rand_scale_x,
+                p.vertex(this.Middle_x + x+ rand_offset* this.max_rand_scale_x,
                          y + l * this.line_offset + rand_offset* this.max_rand_scale_y )
             }
             p.endShape()
         }
 
-        if (false) {
-            p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
-                        // DEBUG sinus
-                        let X = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + X[0] 
-                        let y2 = Middle + X[1]
-                        p.vertex(x2,y2)
-                        no_vertices ++
-            }
-            p.endShape()
-        }
 
         if (this.capture_on) {
             this.capturer.capture(cvs.canvas)

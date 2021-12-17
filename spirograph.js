@@ -1,11 +1,9 @@
-class spirograph {
+class spirograph extends Drawer {
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui)  {
+        super('spirograph',gui, xywh, sub_gui)
 
-
-        this.R = 175
+        this.R = 280
         this.gui_folder_draw_options.add(this, 'R').onChange(function (v) { cvs.draw() }).min(10)
         this.r = 29
         this.gui_folder_draw_options.add(this, 'r').onChange(function (v) { cvs.draw() }).min(1)
@@ -19,28 +17,13 @@ class spirograph {
 
     }
 
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p, fgc, bgc)
         let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-
+       
         let x, y, theta;
 
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
         
         // Move to starting point (theta = 0)
         p.beginShape()
@@ -48,9 +31,9 @@ class spirograph {
         let k = this.r / this.R
         for (theta = 0; theta <= this.theta_end; theta += 0.01) {
             // https://en.wikipedia.org/wiki/Spirograph
-            x = Middle + this.R * ((1-k)*p.cos(theta) + this.l*k*p.cos(((1-k)*theta/k)))
-            y = Middle + this.R * ((1-k)*p.sin(theta) + this.l*k*p.sin(((1-k)*theta/k)))
-            p.vertex(x,y)
+            x = this.R * ((1-k)*p.cos(theta) + this.l*k*p.cos(((1-k)*theta/k)))
+            y = this.R * ((1-k)*p.sin(theta) + this.l*k*p.sin(((1-k)*theta/k)))
+            this.vertex_middle(p, x,y)
             no_vertices++
         }
       

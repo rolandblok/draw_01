@@ -14,7 +14,7 @@ var uniqueID = (function() {
 
 var gui = new dat.GUI();
 var settings = []
-settings.draw_modes  = ['none', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
+settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
@@ -181,9 +181,11 @@ class DrawerSet {
   add_drawer(xywh, xi, yi) {
     let current_drawer = 0
     let gui_string = " " + xi +"_" + yi
-    if (settings.draw_mode == 'wave_circle') {
+    if (settings.draw_mode == 'TEMPLEET') {
+      current_drawer = new TEMPLEET(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'wave_circle') {
       current_drawer = new wave_circle(gui, xywh, gui_string)
-    } else if (settings.draw_mode == 'wave_wave') {
+    }else if (settings.draw_mode == 'wave_wave') {
       current_drawer = new wave_wave(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'spirograph') {
       current_drawer = new spirograph(gui, xywh, gui_string)
