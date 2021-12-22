@@ -23,6 +23,11 @@ settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
 settings.kader = true
 gui.add(settings, 'kader').onChange(function (v) { cvs.draw() })
+settings.square = true
+gui.add(settings, 'square').onChange(function (v) { cvs.draw() })
+settings.aspect = 0.65
+gui.add(settings, 'aspect').step(.01).min(0.1).max(10).onChange(function (v) { cvs.draw() })
+settings.grid_edge = 10
 settings.grid_x = 1
 gui.add(settings, 'grid_x').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
 settings.grid_y = 1
@@ -166,6 +171,9 @@ class DrawerSet {
     let xywh = {}
     let W = window.innerHeight
     let H = window.innerHeight
+    if (!settings.square) {
+      W = H * settings.aspect
+    }
     let D = settings.grid_edge
     let w = (W - (Nx + 1)*D) / Nx
     let h = (H - (Ny + 1)*D) / Ny
