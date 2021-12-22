@@ -1,71 +1,52 @@
 
 
 
-class wave_circle {
+class wave_circle extends Drawer{
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave circle draw options')
-        this.settings = []
-        this.settings.line_width = 13 
-        this.gui_folder_draw_options.add(this.settings,'line_width').onChange(function(v){ cvs.draw()}).min(3)
+    constructor(gui, xywh, sub_gui = '') {
+        super('wave wave draw options',gui, xywh, sub_gui)
+
+        this.line_width = 13 
+        this.gui_folder_draw_options.add(this,'line_width').onChange(function(v){ cvs.draw()}).min(3)
         this.gui_folder_draw_options.open()
       
     }
 
-    close() {
-        this.gui.removeFolder('wave circle draw options')
-    }
-
-    mouse(p, x,y){
-    }
 
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        let no_vertices = 0 
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-        
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
+        super.draw(p, fgc, bgc)
 
-        let R = 0.5 * h / 1.2
+        let no_vertices = 0
+
+        let R = 0.5 * this.h / 1.2
 
         // SINS
         p.strokeWeight(1)
-        for (let y = 0; y < h; y += this.settings.line_width) {
+        for (let yl = 0; yl < this.h; yl += this.line_width) {
 
-            if ((y > (h / 2 - R)) && (y < (h / 2 + R))) {
-                let z = h / 2 - y
+            if ((yl > (this.h / 2 - R)) && (yl < (this.h / 2 + R))) {
+                let z = this.h / 2 - yl
                 p.beginShape()
                 let ll = p.sqrt(R * R - z * z)
-                let left = Middle - ll
-                let right = Middle + ll
+                let left = this.Middle_x - ll
+                let right = this.Middle_y + ll
                 let width = 2 * ll
                 // lines
-                p.line(Left, y, left, y)
-                p.line(right, y, Right, y)
+                p.line(this.Left, yl, left, yl)
+                p.line(right, yl, this.Right, yl)
 
                 // waves
                 let freq = p.round(p.random(1, 15))
-                for (let x = left; x < right; x++) {
-                    let S = y + 0.4 * this.settings.line_width * p.sin(p.TWO_PI * (x - left) * freq / width)
-                    p.vertex(x, S)
+                for (let xl = left; xl < right; xl++) {
+                    let S = yl + 0.4 * this.line_width * p.sin(p.TWO_PI * (xl - left) * freq / width)
+                    p.vertex(xl, S)
                     no_vertices ++
                 }
                 p.endShape()
             } else {
                 // lines
-                p.line(Left, y, Right, y)
+                p.line(this.Left, yl, this.Right, yl)
                 no_vertices += 2
             }
         }

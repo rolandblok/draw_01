@@ -1,15 +1,12 @@
 
-class manipul_lines {
+class manipul_lines extends Drawer{
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui = '') {
+        super('manipul lines options',gui, xywh, sub_gui)
 
         this.lines = []
 
         this.setting1()
-
-        this.draw_max = 1000000
 
         this.gui_folder_draw_options.add(this, 'no_lines').onChange(function (v) { cvs.draw() }).min(10).step(1)
         this.gui_folder_draw_options.add(this, 'mag_scale').onChange(function (v) { cvs.draw() }).min(0.001).step(0.001)
@@ -29,10 +26,11 @@ class manipul_lines {
         this.gui_folder_draw_options.add(this,'capture_this')
         
 
-        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
         this.gui_folder_defaults.add(this, 'setting1')
-        this.gui_folder_defaults.open()
-        this.gui_folder_draw_options.open()
+        if(sub_gui === ' 0_0'){
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+        }
 
 
         this.capturer = new CCapture({
@@ -65,9 +63,6 @@ class manipul_lines {
         cvs.draw()
     }
 
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
     setting1() {
         this.discretizatie = 100
         this.no_lines = 100
@@ -77,35 +72,11 @@ class manipul_lines {
 
     }
 
-    
-    draw_plus() {
-        this.draw_max += 10
-    }
-    draw_min() {
-        this.draw_max -= 10
-        if (this.draw_max < 1) {
-            this.draw_max = 1
-        }
-    }
-
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p, fgc, bgc)
+
         let no_vertices = 0
-        let w = p.width
-        let h = p.height
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-
-        if (this.loop) { 
-            p.loop() 
-        } else {
-            p.noLoop()
-        } 
-
-        if (p.isLooping()) {
-            this.loop_t ++
-        }
 
         if (this.no_lines != this.lines.length){
             this.lines = []
@@ -117,52 +88,11 @@ class manipul_lines {
             }
         }
 
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
-
-        if (this.kader) {
-            p.rect(this.kader_width, this.kader_width, Right-2*this.kader_width, h-2*this.kader_width)
-        }
-
         p.randomSeed(this.randseed)
 
         for (const my_line of this.lines) {
             no_vertices += my_line.draw(p)
         }
-
-
-        // DEBUG
-        if (false) {
-            p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
-                        // DEBUG sinus
-                        let X = this.my_circle_sinus(100, theta)
-                        let x2 = Middle + X[0] 
-                        let y2 = Middle + X[1]
-                        p.vertex(x2,y2)
-                        no_vertices ++
-            }
-            p.endShape()
-        }
-
-        if (this.capture_on) {
-            this.capturer.capture(cvs.canvas)
-            if (this.loop_t * this.loop_speed > p.TWO_PI) {
-                this.capturer.stop()
-                this.capturer.save()
-                this.loop = false
-                p.noLoop()
-                this.capture_on = false
-                p.resize(window.innerWidth, window.innerHeight)
-            }
-        }
-
 
         return no_vertices
     }

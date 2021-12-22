@@ -1,11 +1,8 @@
 
-class read_json {
+class read_json extends Drawer{
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
-
-
+    constructor(gui, xywh, sub_gui = '') {
+        super('read json options',gui, xywh, sub_gui)
 
         this.setting_test()
         this.draw_max = 1000000
@@ -16,8 +13,6 @@ class read_json {
 
         this.gui_folder_draw_options.add(this, 'no_endShapes').listen()
         this.gui_folder_draw_options.add(this, 'file_name').listen()
-        this.kader = true
-        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive','two_colors']).onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
@@ -25,17 +20,13 @@ class read_json {
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
         this.gui_folder_draw_options.add(this,'load_json')
-        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
         this.gui_folder_defaults.add(this, 'setting_test')
         this.gui_folder_defaults.add(this, 'setting_hoogtekaart')
-        this.gui_folder_defaults.open()
-        this.gui_folder_draw_options.open()
+        if(sub_gui === ' 0_0'){
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+        }
 
-
-
-    }
-
-    mouse(p, x,y){
     }
 
     load_done(request, my_obj) {
@@ -85,42 +76,10 @@ class read_json {
         
     }
     
-    draw_plus() {
-        this.draw_max += 10
-    }
-    draw_min() {
-        this.draw_max -= 10
-        if (this.draw_max < 1) {
-            this.draw_max = 1
-        }
-    }
-
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
-
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        console.log("draw")
+        super.draw(p, fgc, bgc)
+
         let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
-        
-        if (this.kader) {
-            p.rect(10, 10, Right-20, h-20)
-        }
-
 
         let no_draws = 1
         let org_map_level = this.map_level.slice()
@@ -191,19 +150,6 @@ class read_json {
                 active_map_level = 'positive'.slice()
                 p.stroke(fgc)
             }
-        }
-
-        if (false) {
-            p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
-                        // DEBUG sinus
-                        let X = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + X[0] 
-                        let y2 = Middle + X[1]
-                        p.vertex(x2,y2)
-                        no_vertices ++
-            }
-            p.endShape()
         }
 
         return no_vertices

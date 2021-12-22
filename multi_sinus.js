@@ -1,17 +1,10 @@
 
-class multi_sinus {
+class multi_sinus extends Drawer {
 
     constructor(gui, xywh, sub_gui = '') {
-        this.gui = gui
-        this.gui_str = 'wave wave draw options' + sub_gui
-        this.gui_folder_draw_options = gui.addFolder(this.gui_str)
-        this.xywh = xywh
-        this.selected = false
-        this.wh_min = Math.min(xywh['w'], xywh['h'])
+        super('multi sinus options',gui, xywh, sub_gui)
 
         this.setting1(false)
-
-        this.draw_max = 1000000
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() })
@@ -25,14 +18,11 @@ class multi_sinus {
         this.gui_folder_draw_options.add(this,'tilt_scale2').onChange(function (v) { cvs.draw() }).step(0.01).listen()
         this.gui_folder_draw_options.add(this,'h_scale').onChange(function (v) { cvs.draw() }).step(0.01).listen()
         
-        this.kader = true
-        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
 
         this.gui_folder_draw_options.add(this,'discretizatie').onChange(function (v) { cvs.draw() }).listen().min(10). step(10)
         this.gui_folder_draw_options.add(this,'randseed').onChange(function (v) { cvs.draw() }).step(1).listen()
 
 
-        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'setting2')
         this.gui_folder_defaults.add(this, 'setting3')
@@ -45,30 +35,7 @@ class multi_sinus {
 
 
     }
-    mouse(p, x,y){
-        let xr = this.xywh['x']
-        let yr = this.xywh['y']
-        let w = this.xywh['w']
-        let h = this.xywh['h']
-        if ((x > xr) && (x < (xr + w)) && (y > yr) && (y < (yr + h))) {
-            this.gui_folder_defaults.open()
-            this.gui_folder_draw_options.open()
-            this.selected = true
-        } else {
-            this.gui_folder_defaults.close()
-            this.gui_folder_draw_options.close()
-            this.selected = false
-        }
-    }
-    key(key) {
-        if ((key === 'r') && this.selected) {
-            this.rando()
-        }
-    }
 
-    close() {
-        this.gui.removeFolder(this.gui_str)
-    }
     setting1(draw_now=true) {
         this.R1 = this.wh_min * 0.15
         this.R2 = this.wh_min * 0.45
@@ -108,6 +75,7 @@ class multi_sinus {
         this.delay_scale = 17.2
         cvs.draw()
     }
+
     rando() {
         this.no_lines = 20 + Math.random() * 100
         this.randseed = Math.floor(Math.random() *100)
@@ -116,40 +84,18 @@ class multi_sinus {
         this.delay_scale = 8*Math.PI*Math.random()
         cvs.draw()
     }
+
+    key(key) {
+        super.key(key)
+        if ((key === 'r') && this.selected) {
+            this.rando()
+        }
+    }
     
-    draw_plus() {
-        this.draw_max += 10
-    }
-    draw_min() {
-        this.draw_max -= 10
-        if (this.draw_max < 1) {
-            this.draw_max = 1
-        }
-    }
-
-
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        let no_vertices = 0
-        let x = this.xywh['x']
-        let y = this.xywh['y']
-        let w = this.xywh['w']
-        let h = this.xywh['h']
-        let Middle_x = this.xywh['x'] + w / 2
-        let Middle_y = this.xywh['y'] + h / 2
-        let Right = this.xywh['x'] + w
-        let Bottom = this.xywh['y'] + h
+        super.draw(p, fgc, bgc)
 
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(x,y,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
-        
-        if (this.kader) {
-            p.rect(this.xywh['x'] + 9, this.xywh['y'] + 9, w-18, h-18)
-        }
+        let no_vertices = 0
 
         p.randomSeed(this.randseed)
 
@@ -162,7 +108,7 @@ class multi_sinus {
             Ss_and_Phases_and_Freqs_and_Delays[i][3] = p.random() * this.delay_scale / (this.no_lines)
         }
 
-        let h_step   = h/2 * this.h_scale / this.no_lines
+        let h_step   = this.h/2 * this.h_scale / this.no_lines
         let h_offset = h_step * this.no_lines / 2
         
         for(let l_no = 0; l_no < this.no_lines; l_no++){
@@ -177,7 +123,7 @@ class multi_sinus {
 
 
                 let V = this.my_circle_sinusus(R, Ss_and_Phases_and_Freqs_and_Delays, phi, S_scale = S_scale, tilt_scale = tilt_scale)
-                p.vertex(Middle_x + V[X], Middle_y + V[Y] - h_offset + l_no * h_step)
+                this.vertex_middle(p, V[X], V[Y] - h_offset + l_no * h_step)
                 no_vertices ++
             }
             p.endShape()
@@ -188,9 +134,7 @@ class multi_sinus {
             for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
                         // DEBUG sinus
                         let V = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle_x + V[0] 
-                        let y2 = Middle_y + V[1]
-                        p.vertex(x2,y2)
+                        this.vertex_middle(V[0], V[1])
                         no_vertices ++
             }
             p.endShape()

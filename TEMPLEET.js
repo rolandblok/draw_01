@@ -1,42 +1,58 @@
 
-class TEMPLEET {
-
-    constructor(gui) {
+class Drawer {
+    constructor(name, gui, xywh, sub_gui) {
         this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+        this.xywh = xywh
+        this.gui_str = name + sub_gui
+        this.gui_folder_draw_options = gui.addFolder(this.gui_str)
+        this.kader = true
+        this.kader_width = 9
 
+        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
 
+        this.selected = false
+        this.wh_min = Math.min(xywh['w'], xywh['h'])
 
-        this.setting1()
-
+        this.set_size(xywh)
         this.draw_max = 1000000
 
-        this.R1 = 180
-        this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10)
-        this.kader = true
-        this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
-
-        this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
-        this.gui_folder_defaults.add(this, 'setting1')
-        this.gui_folder_defaults.open()
-        this.gui_folder_draw_options.open()
-
-
-
     }
-    
-    mouse(p, x,y){
+
+    set_size(xywh) {
+        this.w = this.xywh['w']
+        this.h = this.xywh['h']
+        this.Left = this.xywh['x']
+        this.Right = this.xywh['x'] + this.w
+        this.Top = this.xywh['y']
+        this.Bottom = this.xywh['y'] + this.h
+        this.Middle_x = this.xywh['x'] + this.w / 2
+        this.Middle_y = this.xywh['y'] + this.h / 2
     }
 
     close() {
-        this.gui.removeFolder('wave wave draw options')
+        this.gui.removeFolder(this.gui_str)
     }
-    setting1() {
+
+    mouse(p, x,y){
+        if ((x > this.Left) && (x < (this.Right)) && (y > this.Top) && (y < this.Bottom)) {
+            this.gui_folder_defaults.open()
+            this.gui_folder_draw_options.open()
+            this.selected = true
+        } else {
+            this.gui_folder_defaults.close()
+            this.gui_folder_draw_options.close()
+            this.selected = false
+        }
     }
-    
+
+    key(key) {
+    }
+
     draw_plus() {
         this.draw_max += 10
     }
+
     draw_min() {
         this.draw_max -= 10
         if (this.draw_max < 1) {
@@ -44,37 +60,65 @@ class TEMPLEET {
         }
     }
 
-
-    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-
-        p.clear()
+    draw(p, fgc, bgc) {
         if (p.type === 'SCREEN') {
             p.stroke(bgc) 
             p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
+            p.rect(this.Left,this.Top,this.w,this.h)                 // make sure there is no transparant: movies will fail
         }
         p.stroke(fgc) 
         p.noFill()
-        
         if (this.kader) {
-            p.rect(10, 10, Right-20, h-20)
+            p.rect(this.Left + this.kader_width, this.Top + this.kader_width,
+                 this.w-2*this.kader_width , this.h-2*this.kader_width)
         }
+                
 
+    }
+
+    vertex_middle(p,x,y){
+        p.vertex(this.Middle_x + x, this.Middle_y + y)    
+    }
+
+}
+
+/**
+ * 
+ */
+class TEMPLEET extends Drawer {
+
+    constructor(gui, xywh, sub_gui = '') {
+        let name = "Templeet"
+        super(name, gui, xywh, sub_gui)
+
+        this.setting1()
+
+
+        this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10)
+        this.gui_folder_defaults.add(this, 'setting1')
+        this.gui_folder_defaults.open()
+        this.gui_folder_draw_options.open()
+
+    }
+    
+    setting1() {
+        this.R1 = this.wh_min * 0.15
+
+    }
+    
+
+
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p ,fgc,bgc)
+
+        let no_vertices = 0
 
         if (true) {
             p.beginShape()
             for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
                         // DEBUG sinus
                         let V = this.my_circle_sinus(this.R1, theta)
-                        let x2 = Middle + V[0] 
-                        let y2 = Middle + V[1]
-                        p.vertex(x2,y2)
+                        this.vertex_middle(p, V[0], V[1])
                         no_vertices ++
             }
             p.endShape()

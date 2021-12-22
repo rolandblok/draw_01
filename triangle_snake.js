@@ -1,8 +1,7 @@
-class triangle_snake {
+class triangle_snake extends Drawer{
 
-    constructor(gui) {
-        this.gui = gui
-        this.gui_folder_draw_options = gui.addFolder('wave wave draw options')
+    constructor(gui, xywh, sub_gui = '') {
+        super("triange snake options",gui, xywh, sub_gui)
 
 
         this.R = 200
@@ -17,30 +16,11 @@ class triangle_snake {
         this.gui_folder_draw_options.add(this, 'sinus_snake').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.open()
 
-
     }
-
-    close() {
-        this.gui.removeFolder('wave wave draw options')
-    }
-
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        let no_vertices = 0
-        let w = window.innerWidth
-        let h = window.innerHeight
-        let Left = 0
-        let Middle = h / 2
-        let Right = h
-        
-        p.clear()
-        if (p.type === 'SCREEN') {
-            p.stroke(bgc) 
-            p.fill(bgc)
-            p.rect(0,0,w,h)                 // make sure there is no transparant: movies will fail
-        }
-        p.stroke(fgc) 
-        p.noFill()
+        super.draw(p, fgc, bgc)
 
+        let no_vertices = 0
 
         // Move to starting point (theta = 0)
         p.beginShape()
@@ -62,11 +42,11 @@ class triangle_snake {
                 } 
             }
             let tria = this.my_triangle(theta*this.no_triangles - FLOATING_POINT_ACCURACY)
-            let x = Middle + x_offset + this.R2*tria[0]
+            let x = x_offset + this.R2*tria[0]
             // let x = Middle + this.R*p.sin(theta) + this.R*p.sin(theta*this.no_circles-p.PI)
             let y_offset   = 2*this.R * (1-2*theta)
-            let y = Middle + y_offset + this.R2*tria[1]
-            p.vertex(x,y)
+            let y = y_offset + this.R2*tria[1]
+            this.vertex_middle(p, x, y)
             no_vertices ++
 
         }
