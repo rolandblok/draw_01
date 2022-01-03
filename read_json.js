@@ -258,6 +258,7 @@ class LatestHeight {
     }
 
     check_vis_and_add_point(Px, Py) {
+        
         let vis = false
         let x = Px.toFixed()
         if (this.ys[x]) {  // check if exists
