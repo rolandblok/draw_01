@@ -84,6 +84,7 @@
                         p.beginShape()
                         shape_active = true
                     }
+                    
                     p.curveVertex(vx, vy)
                     // p.vertex(vx, vy)
                     no_vertices ++

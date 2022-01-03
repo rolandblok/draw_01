@@ -76,6 +76,12 @@ class Drawer {
 
     }
 
+    move_middle(V){
+        return [this.Middle_x + V[X], this.Middle_y + V[Y]]
+    }
+
+    
+
     vertex_middle(p,x,y){
         p.vertex(this.Middle_x + x, this.Middle_y + y)    
     }
@@ -115,7 +121,7 @@ class TEMPLEET extends Drawer {
 
         if (true) {
             p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += 0.1) {
+            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 100) {
                         // DEBUG sinus
                         let V = this.my_circle_sinus(this.R1, theta)
                         this.vertex_middle(p, V[0], V[1])
