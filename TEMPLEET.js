@@ -20,6 +20,7 @@ class Drawer {
     }
 
     set_size(xywh) {
+        this.xywh = xywh
         this.w = this.xywh['w']
         this.h = this.xywh['h']
         this.Left = this.xywh['x']

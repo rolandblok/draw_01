@@ -16,9 +16,9 @@ class circle_lines  extends Drawer{
 
         this.gui_folder_draw_options.add(this, 'no_lines').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
         this.gui_folder_draw_options.add(this, 'ph1').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
-        this.gui_folder_draw_options.add(this, 'ph1_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.1).listen()
+        this.gui_folder_draw_options.add(this, 'ph1_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.01).listen()
         this.gui_folder_draw_options.add(this, 'ph2').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
-        this.gui_folder_draw_options.add(this, 'ph2_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.1).listen()
+        this.gui_folder_draw_options.add(this, 'ph2_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.01).listen()
         this.gui_folder_draw_options.add(this, 'R1_perc').onChange(function (v) { cvs.draw() }).min(10).step(1)
         this.gui_folder_draw_options.add(this,'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(10)
         this.gui_folder_draw_options.add(this,'randseed').onChange(function (v) { cvs.draw() }).step(1)

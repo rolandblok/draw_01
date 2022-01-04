@@ -16,7 +16,7 @@ var gui = new dat.GUI();
 var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
-                        'circle_lines', 'multi_sinus']
+                        'circle_lines', 'multi_sinus', 'circle_block_snake']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
@@ -26,8 +26,8 @@ gui.add(settings, 'kader').onChange(function (v) { cvs.draw() })
 settings.square = true
 gui.add(settings, 'square').onChange(function (v) { cvs.draw() })
 settings.aspect = 0.65
-gui.add(settings, 'aspect').step(.01).min(0.1).max(10).onChange(function (v) { cvs.draw() })
-settings.grid_edge = 10
+gui.add(settings, 'aspect').step(.01).min(0.5).max(2).onChange(function (v) { cvs.draw() })
+settings.grid_edge = 2
 settings.grid_x = 1
 gui.add(settings, 'grid_x').step(1).min(1).max(10).onChange(function (v) { cvs.draw() })
 settings.grid_y = 1
@@ -215,15 +215,18 @@ class DrawerSet {
       current_drawer = new circle_lines(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'multi_sinus'){
       current_drawer = new multi_sinus(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'circle_block_snake'){
+      current_drawer = new circle_block_snake(gui, xywh, gui_string)
     }
     this.drawers[xi][yi] = current_drawer
   }
 
   draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+    let xywh =  this.calc_xywh(1,1, 0, 0)
     p.clear()
     if (settings.kader) {
       p.stroke(fgc)
-      p.rect( 10,  10,  window.innerHeight - 20,  window.innerHeight-20)
+      p.rect( xywh.x,  xywh.y,  xywh.w,  xywh.h)
     }
     let no_vertices = 0
     for(let y_drawers of this.drawers) {

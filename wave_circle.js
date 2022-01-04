@@ -23,7 +23,7 @@ class wave_circle extends Drawer{
 
         // SINS
         p.strokeWeight(1)
-        for (let yl = 0; yl < this.h; yl += this.line_width) {
+        for (let yl = this.Top; yl < this.Bottom; yl += this.line_width) {
 
             if ((yl > (this.h / 2 - R)) && (yl < (this.h / 2 + R))) {
                 let z = this.h / 2 - yl
