@@ -16,7 +16,7 @@ var gui = new dat.GUI();
 var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
-                        'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg']
+                        'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
@@ -221,6 +221,8 @@ class DrawerSet {
       current_drawer = new PlasmaLines(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'csg'){
       current_drawer = new csg(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'hex_circle'){
+      current_drawer = new hex_circle(gui, xywh, gui_string)
     }
     
     this.drawers[xi][yi] = current_drawer
