@@ -35,11 +35,11 @@ class wave_wave extends Drawer{
         // SINS
         p.strokeWeight(1)
         p.noFill()
-        for (let y = this.Top; y < this.Bottom+FLOATING_POINT_ACCURACY; y += this.line_width) {
+        for (let y = this.Top; y < this.Bottom; y += this.line_width) {
             let ph_offset = this.ph_scale*p.sin(p.PI*0.001*this.ph_period_scale*y)
             let ph_offset2 = this.ph_scale2*p.sin(p.PI*0.001*this.ph_period_scale2*y)
             p.beginShape()
-            for (let x = this.Left; x < this.Right+; x+=10) {
+            for (let x = this.Left; x < this.Right; x+=10) {
                 let S = y + this.sin_scale * this.line_width * p.sin(p.TWO_PI * this.main_phase*0.001* (x+ph_offset+ph_offset2))
                 p.vertex(x, S)
                 no_vertices++

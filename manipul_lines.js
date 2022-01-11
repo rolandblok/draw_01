@@ -15,15 +15,8 @@ class manipul_lines extends Drawer{
         this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this,'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(10)
         this.gui_folder_draw_options.add(this,'randseed').onChange(function (v) { cvs.draw() }).step(1)
-
-        this.loop_t = 0;
-        this.loop = false
-        this.gui_folder_draw_options.add(this,'loop').onChange(function (v) { cvs.draw() })
-        this.loop_speed = 0.1
-        this.gui_folder_draw_options.add(this,'loop_speed').onChange(function (v) { cvs.draw() }).min(0.01).step(.01).listen()
-
-        this.capture_on = false
-        this.gui_folder_draw_options.add(this,'capture_this')
+        this.regen = true
+        this.gui_folder_draw_options.add(this,'regen').onChange(function (v) { cvs.draw() }).listen()
         
 
         this.gui_folder_defaults.add(this, 'setting1')
@@ -31,29 +24,9 @@ class manipul_lines extends Drawer{
             this.gui_folder_defaults.open()
             this.gui_folder_draw_options.open()
         }
-
-
-        this.capturer = new CCapture({
-            framerate: 5,
-            format: "png",
-            name: "movie",
-            quality: 100,
-            verbose: true,
-          });
     
     }
 
-    capture_this() {
-        // https://stubborncode.com/posts/how-to-export-images-and-animations-from-p5-js/
-        if (!this.capture_on) {
-            cvs.resizeCanvas(1024,1024)  // https://stackoverflow.com/questions/48036719/p5-js-resize-canvas-height-when-div-changes-height
-            this.capture_on = true
-            this.capturer.start()
-            this.loop = true
-            cvs.draw()
-        }
-        // ffmpeg -framerate 60  -i %07d.png -vf format=yuv420p movie.mp4
-    }
 
     mouse(p, x,y){
         console.log("roland")
@@ -68,17 +41,18 @@ class manipul_lines extends Drawer{
         this.no_lines = 100
         this.mag_scale = 0.1
         this.randseed = 0
+        this.regen = true
         cvs.draw()
 
     }
-
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p, fgc, bgc)
 
         let no_vertices = 0
 
-        if (this.no_lines != this.lines.length){
+        if (this.regen || (this.no_lines != this.lines.length)) {
+            this.regen = false
             this.lines = []
             // need to think how to connect this to GUI
             for (let li = 0; li < this.no_lines; li ++) {
