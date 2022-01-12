@@ -1,7 +1,7 @@
 /**
  * 
  */
- class PlasmaLines extends Drawer {
+class PlasmaLines extends Drawer {
 
     constructor(gui, xywh, sub_gui = '') {
         let name = "Templeet"
@@ -15,33 +15,33 @@
         this.gui_folder_draw_options.add(this, 'plasma_depth').onChange(function (v) { cvs.draw() }).min(2).step(1).max(9)
         this.gui_folder_draw_options.add(this, 'plasma_scale').onChange(function (v) { cvs.draw() }).min(10)
         this.gui_folder_draw_options.add(this, 'pole_scale').onChange(function (v) { cvs.draw() }).min(1)
-        
+
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
     }
-    
+
     setting1() {
         this.kader = false
         this.R1 = this.wh_min * 0.15
         this.plasma_depth = 7
         this.plasma_scale = 240
         this.pole_scale = 1000
-        this.plasma = new Plasma(1<<this.plasma_depth)
+        this.plasma = new Plasma(1 << this.plasma_depth)
 
     }
 
-    mouse(p, x,y){
+    mouse(p, x, y) {
         if ((x > this.Left) && (x < (this.Right)) && (y > this.Top) && (y < this.Bottom)) {
-            let new_pole = new MyPole(x,y,this.pole_scale)
+            let new_pole = new MyPole(x, y, this.pole_scale)
             this.poles.push(new_pole)
-        } 
+        }
         cvs.draw()
     }
 
-    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        super.draw(p ,fgc,bgc)
+    draw(p, fgc = [0, 0, 0], bgc = [255, 255, 255]) {
+        super.draw(p, fgc, bgc)
 
         let pl_size = 1 << this.plasma_depth
         if (pl_size != this.plasma.size) {
@@ -62,12 +62,12 @@
         // }
 
         let latest_height = new LatestHeight()
-        for (let py= pl_size -1; py >= 0 ; py --) {
+        for (let py = pl_size - 1; py >= 0; py--) {
             let shape_active = true
             p.beginShape()
-            for (let px = 0; px < pl_size; px ++) {
-                let pix_x = this.Left + px * this.w / (pl_size-1)
-                let pix_y = this.Top + py * this.h / (pl_size-1)
+            for (let px = 0; px < pl_size; px++) {
+                let pix_x = this.Left + px * this.w / (pl_size - 1)
+                let pix_y = this.Top + py * this.h / (pl_size - 1)
 
                 let pl = this.plasma.get_value_at(px, py)
 
@@ -77,19 +77,19 @@
                 }
 
                 let vx = pix_x
-                let vy = pix_y - (pl-0.5)*this.plasma_scale - y_pole
+                let vy = pix_y - (pl - 0.5) * this.plasma_scale - y_pole
 
                 if (latest_height.check_vis_and_add_point(vx, vy)) {
                     if (!shape_active) {
                         p.beginShape()
                         shape_active = true
                     }
-                    
+
                     p.curveVertex(vx, vy)
                     // p.vertex(vx, vy)
-                    no_vertices ++
+                    no_vertices++
                 } else {
-                    if(shape_active) {
+                    if (shape_active) {
                         p.endShape()
                         shape_active = false
                     }
@@ -114,29 +114,29 @@
      */
     my_circle_sinus(R, phi) {
         // https://upload.wikimedia.org/wikipedia/commons/4/4c/Unit_circle_angles_color.svg
-        let x,y
+        let x, y
         x = R * Math.sin(phi)
         y = R * Math.cos(phi)
-        return [x,y]
+        return [x, y]
     }
 }
 
 class MyPole {
 
-    constructor(x,y, s) {
+    constructor(x, y, s) {
         this.px = x
         this.py = y
         this.s = s
     }
-    get_val(x,y) {
+    get_val(x, y) {
         let dx = this.px - x
         let dy = this.py - y
-        let noemer = Math.sqrt(dx*dx + dy*dy)
+        let noemer = (dx * dx + dy * dy)
         if (Math.abs(noemer) < FLOATING_POINT_ACCURACY) {
             noemer = FLOATING_POINT_ACCURACY
         }
 
-        return -this.s/noemer
+        return -this.s / noemer
 
     }
 }
