@@ -94,11 +94,13 @@
         p.randomSeed(this.randseed)
 
 
-        if (false) {
+        if (true) {
+            let A = Math.PI * this.R1 * this.R1
+            let xagon = new Xagon(A, 5)
             p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 100) {
-                        // DEBUG sinus
-                        let V = this.my_circle_sinus(this.R1, theta)
+            for (let ph = 0; ph <= 1 + FLOATING_POINT_ACCURACY; ph += 0.01) {
+                        // DEBUG xagon
+                        let V = xagon.getXY(ph)
                         this.vertex_middle(p, V[0], V[1])
                         no_vertices ++
             }
@@ -124,6 +126,8 @@
         y = R * Math.cos(phi)
         return [x,y]
     }
+
+
 }
 
 
