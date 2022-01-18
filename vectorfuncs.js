@@ -152,3 +152,12 @@ const rot2=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
     R[3] = R[0]
     return R
 }
+const shuffle=(A)=> {
+    for (let i = 0; i < A.length - 1; i ++) {
+        let j = Math.floor( Math.random() * A.length )
+        let t = A[i]
+        A[i] = A[j]
+        A[j] = t
+    }
+    return A
+}
