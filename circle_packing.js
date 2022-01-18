@@ -11,9 +11,9 @@
         this.setting1()
 
 
-        this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
+        this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
-        this.gui_folder_draw_options.add(this, 'no_circles').onChange(function (v) { cvs.draw() }).min(10).step(1)
+        this.gui_folder_draw_options.add(this, 'no_circles').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
         this.gui_folder_draw_options.add(this, 'max_tries').onChange(function (v) { cvs.draw() }).min(10).step(100)
         this.gui_folder_draw_options.add(this, 'hatch_min').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this, 'hatch_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
@@ -32,8 +32,8 @@
     
     setting1() {
         this.Rmax = 100
-        this.Rmin = 20
-        this.no_circles = 100
+        this.Rmin = 5
+        this.no_circles = 300
         this.max_tries = 1000
         this.hatch_min = 4
         this.hatch_max = 10
@@ -65,7 +65,7 @@
         // create a random grid
         let P = []
         for (let xi = this.Left + this.Rmin; xi < this.Right - this.Rmin; xi ++) {
-            for (let yi = this.Left + this.Rmin; yi < this.Right - this.Rmin; yi ++) {
+            for (let yi = this.Top + this.Rmin; yi < this.Bottom - this.Rmin; yi ++) {
                 P.push([xi,yi])
             }
         }
@@ -74,26 +74,69 @@
         // create ordered radii, big to small
         let rs = []
         for (let ri = 0; ri < this.no_circles; ri ++) {
-            rs.push(this.Rmin + (this.Rmax - this.Rmin) * Math.random() )
+            rs.push(this.Rmin + (this.Rmax - this.Rmin) * Math.random()**3 )
         }
         rs.sort()
         rs.reverse()
 
         // create the circles
-        for (let ci = 0; ci < this.no_circles; ci++) {
-            let tries = 0
-            while (tries < this.max_tries) {
-                let c = new MyCircle(P[ci], rs[ci])
+        // for (let ci = 0; ci < this.no_circles; ci++) {
+        //     let tries = 0
+        //     while (tries < this.max_tries) {
+        //         let c = new MyCircle(P[ci], rs[ci])
 
-                c.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+        //         c.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
 
-                if (c.inside(this.Left, this.Right, this.Top, this.Bottom)) {
-                    this.circles.push(c)
-                    break
-                }
-                tries ++
+        //         if (c.inside(this.Left, this.Right, this.Top, this.Bottom)) {
+        //             this.circles.push(c)
+        //             break
+        //         }
+        //         tries ++
+        //     }
+        // }
+        
+        // for (let ci = 0; ci < this.no_circles; ci++) {
+        //     for (let pi = 0; pi < this.max_tries; pi++) {
+        //         let candidate = new MyCircle(P[pi], rs[ci])
+        //         if (!candidate.inside(this.Left, this.Right, this.Top, this.Bottom)) {
+        //             continue
+        //         }
+        //         if (this.circles.every(x => !candidate.overlaps(x))) {
+        //             candidate.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+        //             this.circles.push(candidate)
+        //             P.splice(pi, 1)
+        //             break
+        //         }
+        //     }
+        // }
+
+        this.circles = []
+        let fails = 0
+        while (fails < this.max_tries) {
+            let x = this.Left + (this.Right - this.Left) * Math.random()
+            let y = this.Top + (this.Bottom - this.Top) * Math.random()
+
+            let distances = this.circles.map(c => Math.sqrt((c.x-x)**2 + (c.y-y)**2 ) - c.R)
+            distances.push(x-this.Left)
+            distances.push(this.Right - x)
+            distances.push(y-this.Top)
+            distances.push(this.Bottom - y)
+            distances.push(this.Rmax)
+
+            let radius = Math.min(...distances)
+
+            if (radius < this.Rmin) {
+                fails++
+                continue
+            } else {
+                let new_circle = new MyCircle([x, y], radius)
+                new_circle.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+                this.circles.push(new_circle)
+                fails = 0
             }
         }
+        this.no_circles = this.circles.length
+
         cvs.draw()
     }
 
@@ -178,5 +221,14 @@ class MyCircle {
                 this.hatches.push(lines[li])
             }
         }
+    }
+
+    overlaps(other_circle) {
+        let dx = this.x - other_circle.x
+        let dy = this.y - other_circle.y
+        let distance = dx*dx + dy*dy
+        let distance_r = (this.R + other_circle.R)**2
+        return distance < distance_r
+
     }
 }
