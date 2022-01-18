@@ -46,6 +46,11 @@ class Drawer {
             this.selected = false
         }
     }
+    mousewheel(p, x,y,count) {
+        if ((x > this.Left) && (x < (this.Right)) && (y > this.Top) && (y < this.Bottom)) {
+            return count
+        } 
+    }
 
     key(key) {
     }
@@ -113,7 +118,6 @@ class TEMPLEET extends Drawer {
 
     }
     
-
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p ,fgc,bgc)

@@ -17,7 +17,8 @@ var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw']
-settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
+// settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
+settings.draw_mode = settings.draw_modes[4]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
@@ -129,6 +130,10 @@ let sketch = function(p) {
   p.mousePressed = function(event) {
     // console.log("mousePressed " + event.button + " " + event.clientX + " " + event.clientY)
     p.mouseDragged(event)
+  }
+  p.mouseWheel = function(event) {
+    current_drawers.mousewheel(this, event.clientX, event.clientY, event.wheelDelta / 100)
+
   }
   
   
@@ -277,14 +282,25 @@ class DrawerSet {
       }
     }
   }
+  mousewheel(p, x, y, count) {
+    if (x > window.innerHeight) return
+    for(let y_drawers of this.drawers) {
+      for(let drawer of y_drawers) {
+        drawer.mousewheel(p,x,y, count)
+      }
+    }
+  }
+
+
   key(key) {
     for(let y_drawers of this.drawers) {
       for(let drawer of y_drawers) {
         drawer.key(key)
       }
-    }
+    }    
   }
-}
+  }
+
 
 
 // =================
