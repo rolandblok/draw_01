@@ -60,7 +60,7 @@ class Plasma {
                this.map[x][y] = (this.map[x][y] - min)/delta;
            }
         }
- }
+    }
 
     mapCreateSquare(x, y, width, height,order_offset)
     {
@@ -103,4 +103,11 @@ class Plasma {
     get_value_at(x, y) {
         return this.map[x][y];
     }
+    //get the value on a normed xy scale 
+    get_value_at_normed_xy(x, y) {
+        x = Math.floor(x * this.size)
+        y = Math.floor(y * this.size)
+        return this.map[x][y];
+    }
+
 }

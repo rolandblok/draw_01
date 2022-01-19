@@ -161,3 +161,10 @@ const shuffle=(A)=> {
     }
     return A
 }
+const stringDex=(V) => {
+    let str = ''
+    for (e of V) {
+        str += e.toString() + '_'
+    }
+    return str.slice(0,-1)
+}

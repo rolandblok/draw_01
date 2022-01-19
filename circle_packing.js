@@ -17,6 +17,8 @@
         this.gui_folder_draw_options.add(this, 'max_tries').onChange(function (v) { cvs.draw() }).min(10).step(100)
         this.gui_folder_draw_options.add(this, 'hatch_min').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this, 'hatch_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
+        this.gui_folder_draw_options.add(this, 'plasma_depth').onChange(function (v) { cvs.draw() }).min(2).step(1).max(9)
+        this.gui_folder_draw_options.add(this, 'plasma_height').onChange(function (v) { cvs.draw() }).min(0).step(0.1).max(1)
         this.gui_folder_draw_options.add(this, 'draw_circumferences').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'draw_hatches').onChange(function (v) { cvs.draw() })
 
@@ -37,6 +39,8 @@
         this.max_tries = 1000
         this.hatch_min = 4
         this.hatch_max = 10
+        this.plasma_depth = 7
+        this.plasma_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
         this.kader = false
@@ -62,59 +66,39 @@
     fill_area() {
         this.circles = []
 
-        // create a random grid
-        let P = []
-        for (let xi = this.Left + this.Rmin; xi < this.Right - this.Rmin; xi ++) {
-            for (let yi = this.Top + this.Rmin; yi < this.Bottom - this.Rmin; yi ++) {
-                P.push([xi,yi])
-            }
-        }
-        shuffle(P)
+        let my_plasma = new Plasma(1 << this.plasma_depth)
 
-        // create ordered radii, big to small
-        let rs = []
-        for (let ri = 0; ri < this.no_circles; ri ++) {
-            rs.push(this.Rmin + (this.Rmax - this.Rmin) * Math.random()**3 )
-        }
-        rs.sort()
-        rs.reverse()
-
-        // create the circles
-        // for (let ci = 0; ci < this.no_circles; ci++) {
-        //     let tries = 0
-        //     while (tries < this.max_tries) {
-        //         let c = new MyCircle(P[ci], rs[ci])
-
-        //         c.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
-
-        //         if (c.inside(this.Left, this.Right, this.Top, this.Bottom)) {
-        //             this.circles.push(c)
-        //             break
-        //         }
-        //         tries ++
+        // create a (random) grid
+        // let grid = {}
+        // for (let xi = this.Left + this.Rmin; xi < this.Right - this.Rmin; xi +=1) {
+        //     for (let yi = this.Top + this.Rmin; yi < this.Bottom - this.Rmin; yi +=1) {
+        //         let p = [xi,yi]
+        //         grid[stringDex(p)] = p
         //     }
         // }
-        
-        // for (let ci = 0; ci < this.no_circles; ci++) {
-        //     for (let pi = 0; pi < this.max_tries; pi++) {
-        //         let candidate = new MyCircle(P[pi], rs[ci])
-        //         if (!candidate.inside(this.Left, this.Right, this.Top, this.Bottom)) {
-        //             continue
-        //         }
-        //         if (this.circles.every(x => !candidate.overlaps(x))) {
-        //             candidate.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
-        //             this.circles.push(candidate)
-        //             P.splice(pi, 1)
-        //             break
-        //         }
-        //     }
-        // }
+        //shuffle(grid)
+
 
         this.circles = []
         let fails = 0
         while (fails < this.max_tries) {
-            let x = this.Left + (this.Right - this.Left) * Math.random()
-            let y = this.Top + (this.Bottom - this.Top) * Math.random()
+            // let keys = Object.keys(grid)
+            // let ri   = Math.floor(keys.length * Math.random())
+            // let ki   = keys[ri]
+            // let p = grid[ki];
+            // let x = p[X]
+            // let y = p[Y]
+            let xran = Math.random()
+            let yran = Math.random()
+            let x = Math.floor(this.Left + (this.Right - this.Left) * xran)
+            let y = Math.floor(this.Top + (this.Bottom - this.Top) * yran)
+            let x_01 = xran
+            let y_01 = yran
+            let pl_val = my_plasma.get_value_at_normed_xy(x_01, y_01)
+            if ( pl_val < this.plasma_height) {
+                fails ++
+                continue
+            }
 
             let distances = this.circles.map(c => Math.sqrt((c.x-x)**2 + (c.y-y)**2 ) - c.R)
             distances.push(x-this.Left)
@@ -126,13 +110,20 @@
             let radius = Math.min(...distances)
 
             if (radius < this.Rmin) {
+                // delete grid[ki]
                 fails++
                 continue
             } else {
                 let new_circle = new MyCircle([x, y], radius)
-                new_circle.addHatches(this.hatch_min + Math.random() * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+                new_circle.addHatches(this.hatch_min + pl_val * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
                 this.circles.push(new_circle)
                 fails = 0
+
+                // let r_grid,r_keys = new_circle.getInternalIntGrid()
+                // for (const kr of r_keys) {
+                //     delete grid[kr]
+                // }
+
             }
         }
         this.no_circles = this.circles.length
@@ -178,7 +169,6 @@ class MyCircle {
         return no_vertices
     }
 
-
     pointOn(phi) {
         // https://upload.wikimedia.org/wikipedia/commons/4/4c/Unit_circle_angles_color.svg
         let x = this.x + this.R * Math.sin(phi)
@@ -186,7 +176,7 @@ class MyCircle {
         return [x,y]
     }
 
-    inside(l,r,t,b) {
+    insideBox(l,r,t,b) {
         if ( (this.x > (l + this.R)) && (this.x < (r - this.R)) && 
              (this.y > (t + this.R)) && (this.y < (b - this.R))    ) {
                  return true
@@ -231,4 +221,33 @@ class MyCircle {
         return distance < distance_r
 
     }
+
+    circleDist(c) {
+        return Math.sqrt((this.c.x-c.x)**2 + (this.y-c.y)**2) 
+    }
+    
+    distPoint(P) {
+        return Math.sqrt((this.x-P[X])**2 + (this.y-P[Y])**2)
+    }
+    
+    getInternalIntGrid() {
+        let grid = []
+        let keys = []
+        let li = Math.floor(this.x - this.R)
+        let ri = Math.ceil(this.x + this.R)
+        let ti = Math.floor(this.y - this.R)
+        let bi = Math.ceil(this.y + this.R)
+
+        for (let xi = li; xi <= ri; xi++) {
+            for (let yi = ti; yi <= bi; yi++) {
+                let p = [xi,yi]
+                if (this.distPoint(p) < this.R) {
+                    grid.push(p)
+                    keys.push(stringDex(p))
+                }
+            }
+        }
+        return grid, keys
+    }
+
 }
