@@ -26,6 +26,7 @@ class PlasmaLines extends Drawer {
         this.kader = false
         this.R1 = this.wh_min * 0.15
         this.plasma_depth = 7
+        this.plasma_order_val = 1
         this.plasma_scale = 240
         this.pole_scale = 1000
         this.plasma = new Plasma(1 << this.plasma_depth)
@@ -44,8 +45,8 @@ class PlasmaLines extends Drawer {
         super.draw(p, fgc, bgc)
 
         let pl_size = 1 << this.plasma_depth
-        if (pl_size != this.plasma.size) {
-            this.plasma = new Plasma(pl_size)
+        if ((pl_size != this.plasma.size)) {
+            this.plasma = new Plasma(pl_size, this.order_val)
         }
 
         let no_vertices = 0

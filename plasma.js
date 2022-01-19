@@ -9,7 +9,7 @@ class Plasma {
     create() {
         this.map[0][0] = 0.5
 
-        var order_val = 1;
+        let order_val = 1;
         var order_offset = 1;
         
         while (order_val < this.size)
