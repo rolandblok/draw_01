@@ -41,7 +41,7 @@
 
         for(let R = this.R1; R <= this.R2 + FLOATING_POINT_ACCURACY; R += (this.R2-this.R1) / this.no_xagons) {
             let A = Math.PI * R * R
-            let xagon = new Xagon(A, this.n)
+            let xagon = new Xagon(A, this.n, this.phase)
             p.beginShape()
             let step = 1 / this.n
             for (let ph = 0; ph <= 1 + FLOATING_POINT_ACCURACY; ph += step) {
@@ -97,12 +97,12 @@ class Xagon {
     }
 
     /**
-     * Get the xy position, where phase is from 0 --> 1 (full 'circle')
-     * @param {*} phase 
+     * Get the xy position, where phi is from 0 --> 1 (full 'circle')
+     * @param {*} phi 
      */
-    getXY(phase) {
-        phase = phase % this.n
-        let steps = phase * this.n 
+    getXY(phi) {
+        phi = (phi) % this.n
+        let steps = phi * this.n 
         let steps_full = Math.floor(steps)
         let steps_rem = steps - steps_full
 

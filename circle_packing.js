@@ -10,6 +10,7 @@
 
         this.setting1()
 
+        this.hatch_modes = ['LINES', 'ZIGZAG']
 
         this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
@@ -18,9 +19,10 @@
         this.gui_folder_draw_options.add(this, 'hatch_min').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this, 'hatch_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this, 'plasma_depth').onChange(function (v) { cvs.draw() }).min(2).step(1).max(9)
-        this.gui_folder_draw_options.add(this, 'plasma_height').onChange(function (v) { cvs.draw() }).min(0).step(0.1).max(1)
+        this.gui_folder_draw_options.add(this, 'plasma_min_height').onChange(function (v) { cvs.draw() }).min(0).step(0.1).max(1)
         this.gui_folder_draw_options.add(this, 'draw_circumferences').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'draw_hatches').onChange(function (v) { cvs.draw() })
+        this.gui_folder_draw_options.add(this, 'hatch_mode', this.hatch_modes).onChange(function (v) { cvs.draw() })
 
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'fill_area')
@@ -40,9 +42,10 @@
         this.hatch_min = 4
         this.hatch_max = 10
         this.plasma_depth = 7
-        this.plasma_height = 0.5
+        this.plasma_min_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
+        this.hatch_mode = 'LINES'
         this.kader = false
 
     }
@@ -54,7 +57,7 @@
         let no_vertices = 0
         
         for (const c of this.circles) {
-            no_vertices += c.draw(p, this.draw_circumferences, this.draw_hatches)
+            no_vertices += c.draw(p, this.draw_circumferences, this.draw_hatches, this.hatch_mode)
         }
 
 
@@ -95,7 +98,7 @@
             let x_01 = xran
             let y_01 = yran
             let pl_val = my_plasma.get_value_at_normed_xy(x_01, y_01)
-            if ( pl_val < this.plasma_height) {
+            if ( pl_val < this.plasma_min_height) {
                 fails ++
                 continue
             }
@@ -115,8 +118,13 @@
                 continue
             } else {
                 let new_circle = new MyCircle([x, y], radius)
-                new_circle.addHatches(this.hatch_min + pl_val * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
                 this.circles.push(new_circle)
+
+                let hatch_frac = (pl_val-this.plasma_min_height)/(1-this.plasma_min_height)
+                if (this.hatch_mode == 'LINES') {
+                    new_circle.addHatches(this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+                } 
+
                 fails = 0
 
                 // let r_grid,r_keys = new_circle.getInternalIntGrid()
@@ -143,7 +151,7 @@ class MyCircle {
         this.hatches = []
     }
 
-    draw(p, draw_circumference = true, draw_hatches=false) {
+    draw(p, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
         let no_vertices
         if (draw_circumference) {
             p.beginShape()
@@ -157,12 +165,22 @@ class MyCircle {
         }
 
         if (draw_hatches) {
-            for (const h of this.hatches) {
+            if (draw_hatch_mode==='LINES') {
+                for (const h of this.hatches) {
+                    p.beginShape()
+                    p.vertex(h[0][X], h[0][Y])
+                    p.vertex(h[1][X], h[1][Y])
+                    no_vertices += 2
+                    p.endShape()
+                } 
+            } else if (draw_hatch_mode==='ZIGZAG') {
                 p.beginShape()
-                p.vertex(h[0][X], h[0][Y])
-                p.vertex(h[1][X], h[1][Y])
-                no_vertices += 2
+                for (let hi = 0; hi < this.hatches.length-2; hi++) {
+                    p.vertex(this.hatches[hi][0][X], this.hatches[hi][0][Y])
+                    p.vertex(this.hatches[hi+1][1][X], this.hatches[hi+1][1][Y])
+                    no_vertices += 2
                 p.endShape()
+                }
             }
         }
 
@@ -211,6 +229,13 @@ class MyCircle {
                 this.hatches.push(lines[li])
             }
         }
+        // this.hatches.sort(function(a,b){return a[]})
+        // for (const h of this.hatches) {
+        //     for (const p of h) {
+
+        //     }
+        // }
+
     }
 
     overlaps(other_circle) {
