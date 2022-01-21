@@ -114,7 +114,12 @@
 }
 
 
-
+/**
+ * stolen code from https://github.com/lovasoa/salesman.js
+ * functions to do the optimizations
+ * Only used by salesman class below, can be ignored.
+ * @param {*} points 
+ */
 
 function PathSales(points) {
   this.points = points;
@@ -181,22 +186,13 @@ PathSales.prototype.randomPos = function() {
  *  Given a list of points and the distances between each pair of points,
  *  what is the shortest possible route that visits each point exactly
  *  once and returns to the origin point?
+ * 
+ * Fill a list with nodes.
+ * Create the class
+ * When ready : press solve_sales.
+ * The results can be taken getOptimalOrder(). It returns an array wiht indicess with optimal order for input array.
+ * 
  *
- * @param {PointSales[]} points The points that the path will have to visit.
- * @param {Number} [temp_coeff=0.999] changes the convergence speed of the algorithm: the closer to 1, the slower the algorithm and the better the solutions.
- * @param {max_steps} stops at max steps
- *
- * @returns {Number[], converged} An array of indexes in the original array. Indicates in which order the different points are visited.
- *          
- *
- * @example
- * var points = [
- *       new salesman.PointSales(2,3)
- *       //other points
- *     ];
- * var solution = salesman.solve(points);
- * var ordered_points = solution.map(i => points[i]);
- * // ordered_points now contains the points, in the order they ought to be visited.
  **/
 class SalesManSolver {
     constructor(sales_nodes) {
@@ -236,6 +232,9 @@ class SalesManSolver {
 
 }
 
+/**
+ * template class for sales nodes. Importand : IMPLEMENT the sales_distance funcion.
+ */
 class SalesNode {
     constructor() {
 
@@ -246,6 +245,10 @@ class SalesNode {
 }
 
  
+/**
+ * example implementation, originaly used by drawer example above. 
+ * Can be used to sort nodes with only one point.
+ */
 class MySalesPoint extends SalesNode {
     constructor(x,y) {
         super()
@@ -257,7 +260,12 @@ class MySalesPoint extends SalesNode {
         return Math.sqrt(dx*dx + dy*dy);
     }
 }
-  
+ 
+/**
+ * Example implementation, used by drawer above.
+ * Used to optimze double points with start and end.
+ */
+
 class MySalesDoublePoint extends SalesNode {
     constructor(p1,p2) {
         super()
@@ -278,9 +286,16 @@ class MySalesDoublePoint extends SalesNode {
 
 }
 
-
+/**
+ * implementation of node for use with Vertex bundles.
+ * When implementing drawer, draw everything first using addVertex.
+ * Then can be optimized in SalesmanVerticesNodeSet.
+ * 
+ * This one you don't need to used, is class needed for SalesmanVerticesNodeSet
+ * 
+ */
 class SalesmanVerticesNode extends SalesNode {
-    constructor(x,y) {
+    constructor() {
         super()
         this.vertices = []
     }
@@ -310,12 +325,24 @@ class SalesmanVerticesNode extends SalesNode {
     }
 }
 
+/**
+ * the class to be used when drawing many lines, which need to be optimized.
+ * 
+ * 1) First create the salesmanvericesnodeset instance
+ * 2) Each beginshape/endShape needs to replaced with beginShape / add vertex
+ * 3) Then you can optimize the path (if you want, not per see needed)
+ * 4) Use the draw function to final draw.
+ * 
+ * Note : you need to get the filling of the shapes out of the default draw code, because
+ * the optimize path you don't want to do each time. Look at circle_packing for use.
+ */
 class SalesmanVerticesNodeSet {
     constructor() {
         this.vertices_nodes = []
         this.best_order_indices = []
         this.optimized = false
     }
+
     beginShape() {
         this.best_order_indices.push(this.vertices_nodes.length)
         this.vertices_nodes.push(new SalesmanVerticesNode())
@@ -324,6 +351,7 @@ class SalesmanVerticesNodeSet {
         this.vertices_nodes.slice(-1)[0].addVertex(x,y)
         
     }
+
     optimizePath() {
         if (!this.optimized) {
             let salesman_solver = new SalesManSolver(this.vertices_nodes)
@@ -332,6 +360,7 @@ class SalesmanVerticesNodeSet {
             this.optimzed = true
         }
     }
+    
     draw(p, draw_path) {
         let vertices = 0
         for (const ni of this.best_order_indices ) {

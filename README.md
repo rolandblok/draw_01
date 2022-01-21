@@ -10,3 +10,5 @@ Used Libs :
 [p5js](https://github.com/processing/p5.js/) - 
 [p5svg](https://github.com/zenozeng/p5.js-svg)
 
+inspired/forked/stolen: 
+[salesman](https://github.com/lovasoa/salesman.js)
