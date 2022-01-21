@@ -68,7 +68,7 @@
     start_solve() {
         this.no_iterations=0
         this.solving = true
-        this.salesman = new SolveSalesMan(this.my_points)
+        this.salesman = new SalesManSolver(this.my_points)
         cvs.draw()
     }
 
@@ -80,7 +80,7 @@
         if (this.solving) {
             p.loop()
             let res = this.salesman.solve_sales(1-5e-7, 1e6 )
-            this.sort_indices = this.salesman.path.order
+            this.sort_indices = this.salesman.getOptimalOrder()
             this.no_iterations += res
             if (this.salesman.converged) {
                 p.noLoop()
@@ -198,10 +198,10 @@ PathSales.prototype.randomPos = function() {
  * var ordered_points = solution.map(i => points[i]);
  * // ordered_points now contains the points, in the order they ought to be visited.
  **/
-class SolveSalesMan {
-    constructor(points) {
-        this.points = points
-        this.path = new PathSales(points);
+class SalesManSolver {
+    constructor(sales_nodes) {
+        this.points = sales_nodes
+        this.path = new PathSales(sales_nodes);
         this.converged = false
         this.temperature = 100 *this.path.access(0). sales_distance( this.path.access(1))
     }
@@ -230,6 +230,10 @@ class SolveSalesMan {
         
         return steps
     }
+    getOptimalOrder() {
+        return this.path.order
+    }
+
 }
 
 class SalesNode {
@@ -273,4 +277,93 @@ class MySalesDoublePoint extends SalesNode {
     }
 
 }
-   
+
+
+class SalesmanVerticesNode extends SalesNode {
+    constructor(x,y) {
+        super()
+        this.vertices = []
+    }
+    addVertex(x,y) {
+        let V = [x,y]
+        this.vertices.push(V)
+    }
+
+    draw(p) {
+        let vertices = 0
+        for (const v of this.vertices) {
+            p.vertex(v[X], v[Y])
+            vertices ++
+        }
+        return vertices
+    }
+    sales_distance(svn) {
+        let dx = this.last()[X] - svn.first()[X]
+        let dy = this.last()[Y] - svn.first()[Y]
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+    last() {
+        return this.vertices.slice(-1)[0]
+    }
+    first() {
+        return this.vertices[0]
+    }
+}
+
+class SalesmanVerticesNodeSet {
+    constructor() {
+        this.vertices_nodes = []
+        this.best_order_indices = []
+        this.optimized = false
+    }
+    beginShape() {
+        this.best_order_indices.push(this.vertices_nodes.length)
+        this.vertices_nodes.push(new SalesmanVerticesNode())
+    }
+    addVertex(x,y) {
+        this.vertices_nodes.slice(-1)[0].addVertex(x,y)
+        
+    }
+    optimizePath() {
+        if (!this.optimized) {
+            let salesman_solver = new SalesManSolver(this.vertices_nodes)
+            salesman_solver.solve_sales(1-5e-7, 1e8 )
+            this.best_order_indices = salesman_solver.getOptimalOrder()
+            this.optimzed = true
+        }
+    }
+    draw(p, draw_path) {
+        let vertices = 0
+        for (const ni of this.best_order_indices ) {
+            p.beginShape()
+            vertices += this.vertices_nodes[ni].draw(p)
+            p.endShape()
+
+        }
+        if (draw_path) {
+            p.stroke(255,50,50)
+
+            for (let si = 1; si < (this.best_order_indices.length); si++) {
+                let s0 = this.best_order_indices[si-1]
+                let s1 = this.best_order_indices[si]
+                let s0_node = this.vertices_nodes[s0]
+                let s0_last = s0_node.last()
+                let s1_node = this.vertices_nodes[s1]
+                let s1_first = s1_node.first()
+                let X0 = s0_last[X]
+                let Y0 = s0_last[Y]
+                let X1 = s1_first[X]
+                let Y1 = s1_first[Y]
+                p.beginShape()
+                p.vertex(X0,Y0)
+                p.vertex(X1, Y1)
+                p.endShape()
+    
+            }
+        }
+
+        return vertices
+    }
+
+}
+

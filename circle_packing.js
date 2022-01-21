@@ -23,53 +23,64 @@
         this.gui_folder_draw_options.add(this, 'draw_circumferences').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'draw_hatches').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'hatch_mode', this.hatch_modes).onChange(function (v) { cvs.draw() })
+        this.gui_folder_draw_options.add(this, 'rand_seed').onChange(function (v) { cvs.draw() }).listen()
 
         this.gui_folder_defaults.add(this, 'setting1')
-        this.gui_folder_defaults.add(this, 'fill_area')
+        this.gui_folder_defaults.add(this, 'fill_area_seeded')
+        this.gui_folder_defaults.add(this, 'fill_area_random')
+        this.gui_folder_defaults.add(this, 'optimize_path')
+        this.gui_folder_defaults.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
+        this.gui_folder_defaults.add(this, 'path_optimized').listen()
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
-        this.circles = []
-        this.fill_area()
 
     }
     
     setting1(redraw=true) {
-        this.Rmax = 100
+        this.Rmax = 70
         this.Rmin = 5
         this.no_circles = 300
         this.max_tries = 1000
-        this.hatch_min = 4
-        this.hatch_max = 10
+        this.hatch_min = 10
+        this.hatch_max = 2
         this.plasma_depth = 7
         this.plasma_min_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
         this.hatch_mode = 'LINES'
         this.kader = false
-        if(redraw) {
-            this.fill_area()
-        }
+        this.path_optimized = false
+        this.draw_path = false
+        this.rand_seed = 0
+        this.fill_area_seeded(redraw)
 
     }
-    
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p ,fgc,bgc)
 
         let no_vertices = 0
-        
-        for (const c of this.circles) {
-            no_vertices += c.draw(p, this.draw_circumferences, this.draw_hatches, this.hatch_mode)
-        }
 
-
+        no_vertices += this.salesman_vertices.draw(p, this.draw_path)
 
         return no_vertices
     }
 
+    fill_area_random() {
+        this.rand_seed = Math.floor( Math.random()*10000)
+        this.fill_area_seeded(true)
+    }
 
-    fill_area() {
+    optimize_path() {
+        this.salesman_vertices.optimizePath()
+        this.path_optimized = true
+        cvs.draw()
+
+    }
+
+    fill_area_seeded(redraw = true) {
+        cvs.randomSeed(this.rand_seed)
         this.circles = []
 
         let my_plasma = new Plasma(1 << this.plasma_depth)
@@ -94,8 +105,8 @@
             // let p = grid[ki];
             // let x = p[X]
             // let y = p[Y]
-            let xran = Math.random()
-            let yran = Math.random()
+            let xran = cvs.random()
+            let yran = cvs.random()
             let x = Math.floor(this.Left + (this.Right - this.Left) * xran)
             let y = Math.floor(this.Top + (this.Bottom - this.Top) * yran)
             let x_01 = xran
@@ -125,7 +136,7 @@
 
                 let hatch_frac = (pl_val-this.plasma_min_height)/(1-this.plasma_min_height)
                 if (this.hatch_mode == 'LINES') {
-                    new_circle.addHatches(this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min), 0.5*Math.PI*Math.random())
+                    new_circle.addHatches(this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min), 0.5*Math.PI*cvs.random())
                 } 
 
                 fails = 0
@@ -139,7 +150,15 @@
         }
         this.no_circles = this.circles.length
 
-        cvs.draw()
+        // pre draw the whole thing
+        this.salesman_vertices = new SalesmanVerticesNodeSet()
+        for (const c of this.circles) {
+            c.draw(this.salesman_vertices, this.draw_circumferences, this.draw_hatches, this.hatch_mode)
+        }
+
+        if(redraw) {
+            cvs.draw()
+        }
     }
 
 
@@ -154,37 +173,36 @@ class MyCircle {
         this.hatches = []
     }
 
-    draw(p, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
+    draw(salesman_vertices, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
         let no_vertices = 0
+
+
         if (draw_circumference) {
-            p.beginShape()
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 100) {
+            // p.beginShape()
+            salesman_vertices.beginShape()
+            for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
                 // DEBUG sinus
                 let V = this.pointOn(theta)
-                p.vertex(V[X], V[Y])
-                no_vertices ++
+                salesman_vertices.addVertex(V[X], V[Y])
+                // p.vertex(V[X], V[Y])
+                // no_vertices ++
             }
-            p.endShape()
+            // p.endShape()
         }
 
         if (draw_hatches) {
             if (draw_hatch_mode==='LINES') {
                 for (const h of this.hatches) {
-                    p.beginShape()
-                    p.vertex(h[0][X], h[0][Y])
-                    p.vertex(h[1][X], h[1][Y])
-                    no_vertices += 2
-                    p.endShape()
+                    // p.beginShape()
+                    salesman_vertices.beginShape()
+                    salesman_vertices.addVertex(h[0][X], h[0][Y])
+                    salesman_vertices.addVertex(h[1][X], h[1][Y])
+                    // p.vertex(h[0][X], h[0][Y])
+                    // p.vertex(h[1][X], h[1][Y])
+                    // no_vertices += 2
+                    // p.endShape()
                 } 
-            } else if (draw_hatch_mode==='ZIGZAG') {
-                p.beginShape()
-                for (let hi = 0; hi < this.hatches.length-2; hi++) {
-                    p.vertex(this.hatches[hi][0][X], this.hatches[hi][0][Y])
-                    p.vertex(this.hatches[hi+1][1][X], this.hatches[hi+1][1][Y])
-                    no_vertices += 2
-                p.endShape()
-                }
-            }
+            } 
         }
 
         return no_vertices

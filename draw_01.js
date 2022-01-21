@@ -18,12 +18,12 @@ settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','ci
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
                       'circle_packing', 'salesman']
-settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
+settings.draw_mode = settings.draw_modes[settings.draw_modes.length-2]
 // settings.draw_mode = settings.draw_modes[4]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
-settings.kader = true
+settings.kader = false
 gui.add(settings, 'kader').onChange(function (v) { cvs.draw() })
 settings.square = true
 gui.add(settings, 'square').onChange(function (v) { cvs.draw() })
