@@ -3,22 +3,20 @@ class circle_snake extends Drawer{
     constructor(gui, xywh, sub_gui = '') {
         super('circle snake options', gui, xywh, sub_gui)
 
-        this.R = 180
+        this.setting1(false)
+
         this.gui_folder_draw_options.add(this, 'R').onChange(function (v) { cvs.draw() }).min(10)
-        this.no_circles = 100
         this.gui_folder_draw_options.add(this, 'no_circles').onChange(function (v) { cvs.draw() }).min(1)
-        this.discretizatie = 0.001
         this.gui_folder_draw_options.add(this, 'discretizatie').onChange(function (v) { cvs.draw() }).min(0.00001)
-        this.sinus_snake = true
         this.gui_folder_draw_options.add(this, 'sinus_snake').onChange(function (v) { cvs.draw() })
 
 
-        this.Dx = 0
         this.gui_folder_draw_options.add(this, 'Dx').onChange(function (v) { cvs.draw() }).step(1).listen()
-        this.Dy = 0
         this.gui_folder_draw_options.add(this, 'Dy').onChange(function (v) { cvs.draw() }).step(1).listen()
-        this.z = 1
         this.gui_folder_draw_options.add(this, 'z').onChange(function (v) { cvs.draw() }).step(0.1).min(0.1).listen()
+
+        this.gui_folder_defaults.add(this, 'setting1')
+        this.gui_folder_defaults.add(this, 'setting2')
 
 
         if(sub_gui === ' 0_0'){
@@ -26,6 +24,28 @@ class circle_snake extends Drawer{
             this.gui_folder_draw_options.open()
         }
 
+    }
+
+    setting1(redraw=true) {
+        this.R = 180
+        this.no_circles = 100
+        this.discretizatie = 0.001
+        this.sinus_snake = true
+        this.Dx = 0
+        this.Dy = 0
+        this.z = 1
+        if(redraw) cvs.draw()
+
+    }
+    setting2() {
+        this.R = 180
+        this.no_circles = 390
+        this.discretizatie = 0.00001
+        this.sinus_snake = true
+        this.Dx = 14
+        this.Dy = -174
+        this.z = 8.1
+        cvs.draw()
     }
 
     mouse(p, x,y){

@@ -8,7 +8,7 @@
         let name = "Templeet"
         super(name, gui, xywh, sub_gui)
 
-        this.setting1()
+        this.setting1(false)
 
         this.hatch_modes = ['LINES', 'ZIGZAG']
 
@@ -34,7 +34,7 @@
 
     }
     
-    setting1() {
+    setting1(redraw=true) {
         this.Rmax = 100
         this.Rmin = 5
         this.no_circles = 300
@@ -47,6 +47,9 @@
         this.draw_hatches = true
         this.hatch_mode = 'LINES'
         this.kader = false
+        if(redraw) {
+            this.fill_area()
+        }
 
     }
     
@@ -152,7 +155,7 @@ class MyCircle {
     }
 
     draw(p, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
-        let no_vertices
+        let no_vertices = 0
         if (draw_circumference) {
             p.beginShape()
             for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 100) {

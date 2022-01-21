@@ -17,7 +17,7 @@ var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
-                      'circle_packing']
+                      'circle_packing', 'salesman']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 // settings.draw_mode = settings.draw_modes[4]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
@@ -233,6 +233,8 @@ class DrawerSet {
       current_drawer = new xagon_draw(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'circle_packing'){
       current_drawer = new circle_packing(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'salesman'){
+      current_drawer = new salesman(gui, xywh, gui_string)
     }
     
     this.drawers[xi][yi] = current_drawer
