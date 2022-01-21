@@ -107,7 +107,7 @@
 
 
 
-        return no_vertices
+        return [no_vertices, path_length ]
     }
 
 
@@ -306,12 +306,19 @@ class SalesmanVerticesNode extends SalesNode {
 
     draw(p) {
         let vertices = 0
+        let distance = 0
+        let prev_V = null
         for (const v of this.vertices) {
             p.vertex(v[X], v[Y])
             vertices ++
+            if (prev_V !== null) {
+                distance += len2(v, prev_V)
+            }
+            prev_V = v
         }
-        return vertices
+        return [vertices, distance]
     }
+
     sales_distance(svn) {
         let dx = this.last()[X] - svn.first()[X]
         let dy = this.last()[Y] - svn.first()[Y]
@@ -357,15 +364,16 @@ class SalesmanVerticesNodeSet {
             let salesman_solver = new SalesManSolver(this.vertices_nodes)
             salesman_solver.solve_sales(1-5e-7, 1e8 )
             this.best_order_indices = salesman_solver.getOptimalOrder()
-            this.optimzed = true
+            this.optimized = true
         }
     }
-    
+
     draw(p, draw_path) {
-        let vertices = 0
+        let ver_dist = [0,0]
         for (const ni of this.best_order_indices ) {
             p.beginShape()
-            vertices += this.vertices_nodes[ni].draw(p)
+            let delta = this.vertices_nodes[ni].draw(p)
+            ver_dist = add2(ver_dist, delta)
             p.endShape()
 
         }
@@ -387,11 +395,14 @@ class SalesmanVerticesNodeSet {
                 p.vertex(X0,Y0)
                 p.vertex(X1, Y1)
                 p.endShape()
+
+                ver_dist = add2(ver_dist, [2, len2(s0_last, s1_first)])
+
     
             }
         }
 
-        return vertices
+        return ver_dist
     }
 
 }

@@ -31,6 +31,7 @@
         this.gui_folder_defaults.add(this, 'optimize_path')
         this.gui_folder_defaults.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
         this.gui_folder_defaults.add(this, 'path_optimized').listen()
+        this.gui_folder_defaults.add(this, 'path_length').listen()
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
@@ -51,6 +52,7 @@
         this.hatch_mode = 'LINES'
         this.kader = false
         this.path_optimized = false
+        this.path_length = 0
         this.draw_path = false
         this.rand_seed = 0
         this.fill_area_seeded(redraw)
@@ -60,11 +62,10 @@
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p ,fgc,bgc)
 
-        let no_vertices = 0
+        let ver_dist = this.salesman_vertices.draw(p, this.draw_path)
 
-        no_vertices += this.salesman_vertices.draw(p, this.draw_path)
-
-        return no_vertices
+        this.path_length = ver_dist[1]
+        return ver_dist[0]
     }
 
     fill_area_random() {
@@ -82,6 +83,7 @@
     fill_area_seeded(redraw = true) {
         cvs.randomSeed(this.rand_seed)
         this.circles = []
+        this.path_optimized = false
 
         let my_plasma = new Plasma(1 << this.plasma_depth)
 
