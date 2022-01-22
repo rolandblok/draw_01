@@ -107,7 +107,7 @@
 
 
 
-        return [no_vertices, path_length ]
+        return no_vertices
     }
 
 
