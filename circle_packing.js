@@ -10,7 +10,7 @@
 
         this.setting1(false)
 
-        this.hatch_modes = ['LINES', 'ZIGZAG']
+        this.hatch_modes = ['LINES', 'CIRCLES']
 
         this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
@@ -49,7 +49,7 @@
         this.plasma_min_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
-        this.hatch_mode = 'LINES'
+        this.hatch_mode = 'CIRCLES'
         this.kader = false
         this.path_optimized = false
         this.path_length = 0
@@ -119,7 +119,7 @@
                 continue
             }
 
-            let distances = this.circles.map(c => Math.sqrt((c.x-x)**2 + (c.y-y)**2 ) - c.R)
+            let distances = this.circles.map(c => Math.sqrt((c.c[X]-x)**2 + (c.c[Y]-y)**2 ) - c.R)
             distances.push(x-this.Left)
             distances.push(this.Right - x)
             distances.push(y-this.Top)
@@ -136,17 +136,18 @@
                 let new_circle = new MyCircle([x, y], radius)
                 this.circles.push(new_circle)
 
+                // line hatches
                 let hatch_frac = (pl_val-this.plasma_min_height)/(1-this.plasma_min_height)
-                if (this.hatch_mode == 'LINES') {
-                    new_circle.addHatches(this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min), 0.5*Math.PI*cvs.random())
-                } 
+                let hatch_spacing = this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min)
+                new_circle.addHatchLines(hatch_spacing, 0.5*Math.PI*cvs.random())
+
+                // circle hatches
+                let centre_offset = [0.7*radius*Math.random(),0]
+                let rot = rot2(2*Math.PI*cvs.random())
+                centre_offset = transform2(centre_offset, rot)
+                new_circle.addHatchCircles(hatch_spacing, centre_offset)
 
                 fails = 0
-
-                // let r_grid,r_keys = new_circle.getInternalIntGrid()
-                // for (const kr of r_keys) {
-                //     delete grid[kr]
-                // }
 
             }
         }
@@ -169,10 +170,10 @@
 
 class MyCircle {
     constructor(V, R) {
-        this.x = V[X]
-        this.y = V[Y]
+        this.c = [...V]
         this.R = R
-        this.hatches = []
+        this.hatches_lines = []
+        this.hatch_circles = []
     }
 
     draw(salesman_vertices, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
@@ -194,17 +195,21 @@ class MyCircle {
 
         if (draw_hatches) {
             if (draw_hatch_mode==='LINES') {
-                for (const h of this.hatches) {
-                    // p.beginShape()
+                for (const h of this.hatch_lines) {
                     salesman_vertices.beginShape()
                     salesman_vertices.addVertex(h[0][X], h[0][Y])
                     salesman_vertices.addVertex(h[1][X], h[1][Y])
-                    // p.vertex(h[0][X], h[0][Y])
-                    // p.vertex(h[1][X], h[1][Y])
-                    // no_vertices += 2
-                    // p.endShape()
                 } 
-            } 
+            } else if (draw_hatch_mode === 'CIRCLES')
+                for (const hc of this.hatch_circles) {
+                    salesman_vertices.beginShape()
+                    for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
+                        let V = new Array(2)
+                        V[X] = hc.c[X] + hc.R * Math.sin(theta)
+                        V[Y] = hc.c[Y] + hc.R * Math.cos(theta)
+                        salesman_vertices.addVertex(V[X], V[Y])
+                    }
+                } 
         }
 
         return no_vertices
@@ -212,79 +217,87 @@ class MyCircle {
 
     pointOn(phi) {
         // https://upload.wikimedia.org/wikipedia/commons/4/4c/Unit_circle_angles_color.svg
-        let x = this.x + this.R * Math.sin(phi)
-        let y = this.y + this.R * Math.cos(phi)
-        return [x,y]
+        let p = new Array(2)
+        p[X] = this.c[X] + this.R * Math.sin(phi)
+        p[Y] = this.c[Y] + this.R * Math.cos(phi)
+        return p
     }
 
     insideBox(l,r,t,b) {
-        if ( (this.x > (l + this.R)) && (this.x < (r - this.R)) && 
-             (this.y > (t + this.R)) && (this.y < (b - this.R))    ) {
+        if ( (this.c[X] > (l + this.R)) && (this.c[X] < (r - this.R)) && 
+             (this.c[Y] > (t + this.R)) && (this.c[Y] < (b - this.R))    ) {
                  return true
              } else {
                  return false
              }
     }
 
-    addHatches(spacing, rotation) {
+    addHatchLines(spacing, rotation) {
         let rot = rot2(rotation)
         let R2 = this.R * this.R
-        this.hatches = []
-        // hatch[hatch_nr][line]
-        // line[0] = point1, line[1] = point2
+        this.hatch_lines = []
         let no_hatches = Math.floor(2*this.R / spacing)
         let hatch_start_px = -spacing * (no_hatches/2 - 0.5)
-        // for (let px = spacing/2; px < this.R; px += spacing) {
         for (let hi = 0; hi < no_hatches; hi++) {
             let px = hatch_start_px + hi*spacing
+            let py = Math.sqrt( R2 - px * px)
             let sign = hi%2?1:-1
 
-            let py = Math.sqrt( R2 - px * px)
             let hatch = Array(2)
-            // lines[1] = Array(2)
             hatch[0] = [px, sign*py]
             hatch[1] = [px, -sign*py]
             for(let pi = 0; pi < 2; pi++) {
                 hatch[pi] = transform2(hatch[pi], rot)
 
-                hatch[pi][X] = hatch[pi][X] + this.x
-                hatch[pi][Y] = hatch[pi][Y] + this.y
+                hatch[pi][X] = hatch[pi][X] + this.c[X]
+                hatch[pi][Y] = hatch[pi][Y] + this.c[Y]
             }
-            this.hatches.push(hatch)
+            this.hatch_lines.push(hatch)
         }
-        // this.hatches.sort(function(a,b){return a[]})
-        // for (const h of this.hatches) {
-        //     for (const p of h) {
+    }
 
-        //     }
-        // }
+    addHatchCircles(spacing, centre_offset) {
+        this.hatch_circles = []
+        let no_hatch_circles = Math.floor(this.R / spacing) + 1
+        spacing = len2(centre_offset) / (no_hatch_circles - 1)
+        let dir_n = normalize2(centre_offset)
+        dir_n = sub2([0,0], dir_n)
+
+        for (let hci = 1; hci < no_hatch_circles-1; hci++) {
+            let R = hci * this.R / (no_hatch_circles-1)
+            let centre = add2(centre_offset,scale2(dir_n, hci*spacing))
+            centre = add2(centre, this.c)
+            let circle = {}
+            circle.R = R
+            circle.c = centre
+            this.hatch_circles.push(circle)
+        }
 
     }
 
     overlaps(other_circle) {
-        let dx = this.x - other_circle.x
-        let dy = this.y - other_circle.y
-        let distance = dx*dx + dy*dy
-        let distance_r = (this.R + other_circle.R)**2
-        return distance < distance_r
-
+        let dx = this.c[X] - other_circle[X]
+        let dy = this.c[Y] - other_circle[Y]
+        let distance2 = dx*dx + dy*dy
+        let distance2_r = (this.R + other_circle.R)**2
+        return distance2 < distance2_r
     }
 
     circleDist(c) {
-        return Math.sqrt((this.c.x-c.x)**2 + (this.y-c.y)**2) 
+        return Math.sqrt((this.c[X]-c[X])**2 + (this.c[Y]-c[Y])**2) 
     }
     
     distPoint(P) {
-        return Math.sqrt((this.x-P[X])**2 + (this.y-P[Y])**2)
+        return Math.sqrt((this.c[X]-P[X])**2 + (this.c[Y]-P[Y])**2)
     }
     
     getInternalIntGrid() {
         let grid = []
         let keys = []
-        let li = Math.floor(this.x - this.R)
-        let ri = Math.ceil(this.x + this.R)
-        let ti = Math.floor(this.y - this.R)
-        let bi = Math.ceil(this.y + this.R)
+        let li = Math.floor(this.c[X] - this.R)
+        let ri = Math.ceil(this.c[X] + this.R)
+        let ti = Math.floor(this.c[Y] - this.R)
+        let bi = Math.ceil(this.c[Y] + this.R)
 
         for (let xi = li; xi <= ri; xi++) {
             for (let yi = ti; yi <= bi; yi++) {
