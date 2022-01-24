@@ -312,7 +312,7 @@ class SalesmanVerticesNode extends SalesNode {
             p.vertex(v[X], v[Y])
             vertices ++
             if (prev_V !== null) {
-                distance += len2(v, prev_V)
+                distance += len2(sub2(v, prev_V))
             }
             prev_V = v
         }
@@ -396,7 +396,7 @@ class SalesmanVerticesNodeSet {
                 p.vertex(X1, Y1)
                 p.endShape()
 
-                ver_dist = add2(ver_dist, [2, len2(s0_last, s1_first)])
+                ver_dist = add2(ver_dist, [2, len2(sub2(s0_last, s1_first))])
 
     
             }

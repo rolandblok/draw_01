@@ -232,25 +232,25 @@ class MyCircle {
         this.hatches = []
         // hatch[hatch_nr][line]
         // line[0] = point1, line[1] = point2
-        for (let px = spacing/2; px < this.R; px += spacing) {
+        let no_hatches = Math.floor(2*this.R / spacing)
+        let hatch_start_px = -spacing * (no_hatches/2 - 0.5)
+        // for (let px = spacing/2; px < this.R; px += spacing) {
+        for (let hi = 0; hi < no_hatches; hi++) {
+            let px = hatch_start_px + hi*spacing
+            let sign = hi%2?1:-1
+
             let py = Math.sqrt( R2 - px * px)
-            let lines = Array(2)
-            lines[0] = Array(2)
-            lines[1] = Array(2)
-            lines[0][0] = [px, py]
-            lines[0][1] = [px, -py]
-            lines[1][0] = [-px, py]
-            lines[1][1] = [-px, -py]
-            for(let li = 0; li < 2; li++) {
+            let hatch = Array(2)
+            // lines[1] = Array(2)
+            hatch[0] = [px, sign*py]
+            hatch[1] = [px, -sign*py]
+            for(let pi = 0; pi < 2; pi++) {
+                hatch[pi] = transform2(hatch[pi], rot)
 
-                for(let pi = 0; pi < 2; pi++) {
-                    lines[li][pi] = transform2(lines[li][pi], rot)
-
-                    lines[li][pi][X] = lines[li][pi][X] + this.x
-                    lines[li][pi][Y] = lines[li][pi][Y] + this.y
-                }
-                this.hatches.push(lines[li])
+                hatch[pi][X] = hatch[pi][X] + this.x
+                hatch[pi][Y] = hatch[pi][Y] + this.y
             }
+            this.hatches.push(hatch)
         }
         // this.hatches.sort(function(a,b){return a[]})
         // for (const h of this.hatches) {
