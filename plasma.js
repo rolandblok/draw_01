@@ -103,6 +103,7 @@ class Plasma {
     get_value_at(x, y) {
         return this.map[x][y];
     }
+    
     //get the value on a normed xy scale 
     get_value_at_normed_xy(x, y) {
         x = Math.floor(x * this.size)
