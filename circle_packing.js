@@ -10,7 +10,7 @@
 
         this.setting1(false)
 
-        this.hatch_modes = ['LINES', 'CIRCLES']
+        this.hatch_modes = ['LINES', 'CIRCLES', 'SPHERE']
 
         this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
@@ -147,6 +147,9 @@
                 centre_offset = transform2(centre_offset, rot)
                 new_circle.addHatchCircles(hatch_spacing, centre_offset)
 
+
+                new_circle.addHatchSpheres(hatch_spacing, centre_offset)
+
                 fails = 0
 
             }
@@ -200,7 +203,7 @@ class MyCircle {
                     salesman_vertices.addVertex(h[0][X], h[0][Y])
                     salesman_vertices.addVertex(h[1][X], h[1][Y])
                 } 
-            } else if (draw_hatch_mode === 'CIRCLES')
+            } else if (draw_hatch_mode === 'CIRCLES') {
                 for (const hc of this.hatch_circles) {
                     salesman_vertices.beginShape()
                     for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
@@ -209,7 +212,19 @@ class MyCircle {
                         V[Y] = hc.c[Y] + hc.R * Math.cos(theta)
                         salesman_vertices.addVertex(V[X], V[Y])
                     }
-                } 
+                }
+            } else if (draw_hatch_mode === 'SPHERE') {
+                for (const hs of this.hatch_spheres) {
+                    salesman_vertices.beginShape()
+                    for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
+                        let V = new Array(2)
+                        V[X] = hs.c[X] + hs.R * Math.sin(theta)
+                        V[Y] = hs.c[Y] + hs.R * Math.cos(theta)
+                        salesman_vertices.addVertex(V[X], V[Y])
+                    }
+                }
+
+            }
         }
 
         return no_vertices
@@ -272,8 +287,26 @@ class MyCircle {
             circle.c = centre
             this.hatch_circles.push(circle)
         }
-
     }
+    addHatchSpheres(spacing, centre_offset) {
+        this.hatch_circles = []
+        let no_hatch_circles = Math.floor(this.R / spacing) + 1
+        spacing = len2(centre_offset) / (no_hatch_circles - 1)
+        let dir_n = normalize2(centre_offset)
+        dir_n = sub2([0,0], dir_n)
+
+        for (let hci = 1; hci < no_hatch_circles-1; hci++) {
+            let frac = 
+            let R =  this.R * hci / (no_hatch_circles-1)
+            let centre = add2(centre_offset,scale2(dir_n, hci*spacing))
+            centre = add2(centre, this.c)
+            let circle = {}
+            circle.R = R
+            circle.c = centre
+            this.hatch_circles.push(circle)
+        }
+    }
+
 
     overlaps(other_circle) {
         let dx = this.c[X] - other_circle[X]
