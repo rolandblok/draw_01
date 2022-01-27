@@ -8,24 +8,35 @@
         let name = "Templeet"
         super(name, gui, xywh, sub_gui)
 
-        this.setting1(false)
+        this.setting_SPHERE(false)
 
-        this.hatch_modes = ['LINES', 'CIRCLES', 'SPHERE']
+        this.hatch_modes = ['LINES', 'CIRCLES', 'SPHERES']
 
         this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'no_circles').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
         this.gui_folder_draw_options.add(this, 'max_tries').onChange(function (v) { cvs.draw() }).min(10).step(100)
-        this.gui_folder_draw_options.add(this, 'hatch_min').onChange(function (v) { cvs.draw() }).min(2).step(1)
-        this.gui_folder_draw_options.add(this, 'hatch_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this, 'plasma_depth').onChange(function (v) { cvs.draw() }).min(2).step(1).max(9)
         this.gui_folder_draw_options.add(this, 'plasma_min_height').onChange(function (v) { cvs.draw() }).min(0).step(0.1).max(1)
         this.gui_folder_draw_options.add(this, 'draw_circumferences').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'draw_hatches').onChange(function (v) { cvs.draw() })
-        this.gui_folder_draw_options.add(this, 'hatch_mode', this.hatch_modes).onChange(function (v) { cvs.draw() })
+
+        this.gui_folder_draw_options.add(this, 'hatch_mode', this.hatch_modes).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_min').onChange(function (v) { cvs.draw() }).min(2).max(15).step(1).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_max').onChange(function (v) { cvs.draw() }).min(2).max(15).step(1).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rand_center').listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rotation_mode',['ANGLE','RANDOM','FOCUS_POS']).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rotation_angle').min(0).max(Math.PI*2).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_x').step(1).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_y').step(1).listen()
+
+        this.gui_folder_draw_options.add(this, 'hatch_max_off').min(0).max(1).listen()
+
         this.gui_folder_draw_options.add(this, 'rand_seed').onChange(function (v) { cvs.draw() }).listen()
 
-        this.gui_folder_defaults.add(this, 'setting1')
+        this.gui_folder_defaults.add(this, 'setting_LINES')
+        this.gui_folder_defaults.add(this, 'setting_CIRCLES')
+        this.gui_folder_defaults.add(this, 'setting_SPHERE')
         this.gui_folder_defaults.add(this, 'fill_area_seeded')
         this.gui_folder_defaults.add(this, 'fill_area_random')
         this.gui_folder_defaults.add(this, 'optimize_path')
@@ -38,7 +49,7 @@
 
     }
     
-    setting1(redraw=true) {
+    setting_LINES(redraw=true) {
         this.Rmax = 70
         this.Rmin = 5
         this.no_circles = 300
@@ -49,7 +60,66 @@
         this.plasma_min_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
+        this.hatch_rand_center = true
+        this.hatch_rotation_mode = 'ANGLE'
+        this.hatch_rot_pos_x = 0.7
+        this.hatch_rot_pos_y = 0.3
+        this.hatch_rotation_angle = 0
+        this.hatch_max_off = 0.7
+        this.hatch_mode = 'LINES'
+        this.kader = false
+        this.path_optimized = false
+        this.path_length = 0
+        this.draw_path = false
+        this.rand_seed = 0
+        this.fill_area_seeded(redraw)
+
+    }
+    setting_CIRCLES(redraw=true) {
+        this.Rmax = 70
+        this.Rmin = 5
+        this.no_circles = 300
+        this.max_tries = 1000
+        this.hatch_min = 10
+        this.hatch_max = 2
+        this.plasma_depth = 7
+        this.plasma_min_height = 0.5
+        this.draw_circumferences = true
+        this.draw_hatches = true
+        this.hatch_rand_center = true
+        this.hatch_rotation_mode = 'ANGLE'
+        this.hatch_rot_pos_x = 0.7
+        this.hatch_rot_pos_y = 0.3
+        this.hatch_rotation_angle = 0
+        this.hatch_max_off = 0.7
         this.hatch_mode = 'CIRCLES'
+        this.kader = false
+        this.path_optimized = false
+        this.path_length = 0
+        this.draw_path = false
+        this.rand_seed = 0
+        this.fill_area_seeded(redraw)
+
+    }
+    
+    setting_SPHERE(redraw=true) {
+        this.Rmax = 70
+        this.Rmin = 5
+        this.no_circles = 300
+        this.max_tries = 1000
+        this.hatch_min = 3
+        this.hatch_max = 5
+        this.plasma_depth = 7
+        this.plasma_min_height = 0.5
+        this.draw_circumferences = true
+        this.draw_hatches = true
+        this.hatch_rand_center = true
+        this.hatch_rotation_mode = 'ANGLE'
+        this.hatch_rot_pos_x = 0.7
+        this.hatch_rot_pos_y = 0.3
+        this.hatch_rotation_angle = 0
+        this.hatch_max_off = 0.7
+        this.hatch_mode = 'SPHERES'
         this.kader = false
         this.path_optimized = false
         this.path_length = 0
@@ -136,19 +206,29 @@
                 let new_circle = new MyCircle([x, y], radius)
                 this.circles.push(new_circle)
 
+                let rot = this.hatch_rotation_angle
+                if (this.hatch_rotation_mode === 'RANDOM') {
+                    rot = 2*Math.PI*cvs.random()
+                } else if (this.hatch_rotation_mode === 'FOCUS_POS') {
+                    rot = Math.atan(this.hatch_rot_pos_y*(this.Bottom - this.Top) - y) / (this.hatch_rot_pos_x*(this.Right - this.Left)- x)
+                }
+                let rotM2 = rot2(rot)
+
                 // line hatches
                 let hatch_frac = (pl_val-this.plasma_min_height)/(1-this.plasma_min_height)
                 let hatch_spacing = this.hatch_min + hatch_frac * (this.hatch_max - this.hatch_min)
-                new_circle.addHatchLines(hatch_spacing, 0.5*Math.PI*cvs.random())
+                new_circle.addHatchLines(hatch_spacing, rotM2)
 
                 // circle hatches
-                let centre_offset = [0.7*radius*Math.random(),0]
-                let rot = rot2(2*Math.PI*cvs.random())
-                centre_offset = transform2(centre_offset, rot)
-                new_circle.addHatchCircles(hatch_spacing, centre_offset)
+                let center_offset = [this.hatch_max_off*radius,0]
+                if (this.hatch_rand_center) {
+                    center_offset[0] = center_offset[0]*Math.random()
+                }
+                center_offset = transform2(center_offset, rotM2)
+                new_circle.addHatchCircles(hatch_spacing, center_offset)
 
-
-                new_circle.addHatchSpheres(hatch_spacing, centre_offset)
+                // sphere hatches
+                new_circle.addHatchSpheres(hatch_spacing, center_offset)
 
                 fails = 0
 
@@ -213,7 +293,7 @@ class MyCircle {
                         salesman_vertices.addVertex(V[X], V[Y])
                     }
                 }
-            } else if (draw_hatch_mode === 'SPHERE') {
+            } else if (draw_hatch_mode === 'SPHERES') {
                 for (const hs of this.hatch_spheres) {
                     salesman_vertices.beginShape()
                     for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
@@ -247,8 +327,8 @@ class MyCircle {
              }
     }
 
-    addHatchLines(spacing, rotation) {
-        let rot = rot2(rotation)
+    addHatchLines(spacing, rotM2) {
+        let rot = rotM2
         let R2 = this.R * this.R
         this.hatch_lines = []
         let no_hatches = Math.floor(2*this.R / spacing)
@@ -288,22 +368,24 @@ class MyCircle {
             this.hatch_circles.push(circle)
         }
     }
-    addHatchSpheres(spacing, centre_offset) {
-        this.hatch_circles = []
+    addHatchSpheres(spacing, center_offset) {
+        this.hatch_spheres = []
         let no_hatch_circles = Math.floor(this.R / spacing) + 1
-        spacing = len2(centre_offset) / (no_hatch_circles - 1)
-        let dir_n = normalize2(centre_offset)
+
+        spacing = len2(center_offset) / (no_hatch_circles - 1)
+        let dir_n = normalize2(center_offset)
         dir_n = sub2([0,0], dir_n)
 
         for (let hci = 1; hci < no_hatch_circles-1; hci++) {
-            let frac = 
-            let R =  this.R * hci / (no_hatch_circles-1)
-            let centre = add2(centre_offset,scale2(dir_n, hci*spacing))
+            let frac = hci / (no_hatch_circles-1)
+            frac = Math.sin(0.5 * Math.PI * frac)
+            let R =  this.R * frac 
+            let centre = add2(center_offset,scale2(dir_n, hci*spacing))
             centre = add2(centre, this.c)
             let circle = {}
             circle.R = R
             circle.c = centre
-            this.hatch_circles.push(circle)
+            this.hatch_spheres.push(circle)
         }
     }
 
