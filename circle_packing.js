@@ -27,8 +27,8 @@
         this.gui_folder_draw_options.add(this, 'hatch_rand_center').listen()
         this.gui_folder_draw_options.add(this, 'hatch_rotation_mode',['ANGLE','RANDOM','FOCUS_POS']).listen()
         this.gui_folder_draw_options.add(this, 'hatch_rotation_angle').min(0).max(Math.PI*2).listen()
-        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_x').step(1).listen()
-        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_y').step(1).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_x').step(.1).listen()
+        this.gui_folder_draw_options.add(this, 'hatch_rot_pos_y').step(.1).listen()
 
         this.gui_folder_draw_options.add(this, 'hatch_max_off').min(0).max(1).listen()
 
@@ -113,8 +113,8 @@
         this.plasma_min_height = 0.5
         this.draw_circumferences = true
         this.draw_hatches = true
-        this.hatch_rand_center = true
-        this.hatch_rotation_mode = 'ANGLE'
+        this.hatch_rand_center = false
+        this.hatch_rotation_mode = 'FOCUS_POS'
         this.hatch_rot_pos_x = 0.7
         this.hatch_rot_pos_y = 0.3
         this.hatch_rotation_angle = 0
@@ -210,7 +210,15 @@
                 if (this.hatch_rotation_mode === 'RANDOM') {
                     rot = 2*Math.PI*cvs.random()
                 } else if (this.hatch_rotation_mode === 'FOCUS_POS') {
-                    rot = Math.atan(this.hatch_rot_pos_y*(this.Bottom - this.Top) - y) / (this.hatch_rot_pos_x*(this.Right - this.Left)- x)
+                    let dx = this.hatch_rot_pos_x*(this.Right - this.Left) - x
+                    let dy = this.hatch_rot_pos_y*(this.Bottom - this.Top) - y
+                    // https://www.softschools.com/math/pre_calculus/direction_angles_of_vectors/
+                    if (dx < 0) {
+                        rot = Math.PI - Math.atan( -dy / dx )
+                    } else {
+                        rot = Math.atan( dy / dx )
+                    }
+
                 }
                 let rotM2 = rot2(rot)
 
