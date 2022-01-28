@@ -211,7 +211,7 @@
                     rot = 2*Math.PI*cvs.random()
                 } else if (this.hatch_rotation_mode === 'FOCUS_POS') {
                     let dx = this.hatch_rot_pos_x*(this.Right - this.Left) - x
-                    let dy = this.hatch_rot_pos_y*(this.Bottom - this.Top) - y
+                    let dy = y - this.hatch_rot_pos_y*(this.Bottom - this.Top)
                     // https://www.softschools.com/math/pre_calculus/direction_angles_of_vectors/
                     if (dx < 0) {
                         rot = Math.PI - Math.atan( -dy / dx )
@@ -367,7 +367,7 @@ class MyCircle {
         dir_n = sub2([0,0], dir_n)
 
         for (let hci = 1; hci < no_hatch_circles-1; hci++) {
-            let R = hci * this.R / (no_hatch_circles-1)
+            let R = this.R * hci / (no_hatch_circles-1)
             let centre = add2(centre_offset,scale2(dir_n, hci*spacing))
             centre = add2(centre, this.c)
             let circle = {}
@@ -387,8 +387,10 @@ class MyCircle {
         for (let hci = 1; hci < no_hatch_circles-1; hci++) {
             let frac = hci / (no_hatch_circles-1)
             frac = Math.sin(0.5 * Math.PI * frac)
+            // frac =  Math.sqrt(frac)
+            // frac =  Math.sqrt(frac)
             let R =  this.R * frac 
-            let centre = add2(center_offset,scale2(dir_n, hci*spacing))
+            let centre = add2(center_offset,scale2(dir_n, frac* (no_hatch_circles-1)*spacing))
             centre = add2(centre, this.c)
             let circle = {}
             circle.R = R
