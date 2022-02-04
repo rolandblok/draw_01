@@ -52,6 +52,7 @@ class sphere_band extends Drawer {
             this.loop = true
             cvs.draw()
         }
+        //  d:\ffmpeg\bin\ffmpeg -framerate 60  -i %07d.png -vf format=yuv420p movie.mp4
         // ffmpeg -framerate 60  -i %07d.png -vf format=yuv420p movie.mp4
     }
 

@@ -31,6 +31,7 @@
         this.gui_folder_draw_options.add(this, 'hatch_rot_pos_y').step(.1).listen()
 
         this.gui_folder_draw_options.add(this, 'hatch_max_off').min(0).max(1).listen()
+        this.gui_folder_draw_options.add(this, 'missing_perc').min(0).max(99).step(1).listen()
 
         this.gui_folder_draw_options.add(this, 'rand_seed').onChange(function (v) { cvs.draw() }).listen()
 
@@ -66,6 +67,7 @@
         this.hatch_rot_pos_y = 0.3
         this.hatch_rotation_angle = 0
         this.hatch_max_off = 0.7
+        this.missing_perc = 0
         this.hatch_mode = 'LINES'
         this.kader = false
         this.path_optimized = false
@@ -92,6 +94,8 @@
         this.hatch_rot_pos_y = 0.3
         this.hatch_rotation_angle = 0
         this.hatch_max_off = 0.7
+        this.missing_perc = 0
+
         this.hatch_mode = 'CIRCLES'
         this.kader = false
         this.path_optimized = false
@@ -119,6 +123,8 @@
         this.hatch_rot_pos_y = 0.3
         this.hatch_rotation_angle = 0
         this.hatch_max_off = 0.7
+        this.missing_perc = 0
+
         this.hatch_mode = 'SPHERES'
         this.kader = false
         this.path_optimized = false
@@ -247,7 +253,7 @@
         // pre draw the whole thing
         this.salesman_vertices = new SalesmanVerticesNodeSet()
         for (const c of this.circles) {
-            c.draw(this.salesman_vertices, this.draw_circumferences, this.draw_hatches, this.hatch_mode)
+            c.draw(this.salesman_vertices, this.draw_circumferences, this.draw_hatches, this.hatch_mode, this.missing_perc/100)
         }
 
         if(redraw) {
@@ -267,48 +273,57 @@ class MyCircle {
         this.hatch_circles = []
     }
 
-    draw(salesman_vertices, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES') {
+    draw(salesman_vertices, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES', missing_frac = 0) {
         let no_vertices = 0
 
 
         if (draw_circumference) {
             // p.beginShape()
-            salesman_vertices.beginShape()
-            for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
-                // DEBUG sinus
-                let V = this.pointOn(theta)
-                salesman_vertices.addVertex(V[X], V[Y])
-                // p.vertex(V[X], V[Y])
-                // no_vertices ++
+            if (Math.random() > (missing_frac)) {
+                salesman_vertices.beginShape()
+                for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
+                    // DEBUG sinus
+                    let V = this.pointOn(theta)
+                    salesman_vertices.addVertex(V[X], V[Y])
+                    // p.vertex(V[X], V[Y])
+                    // no_vertices ++
+                }
+                // p.endShape() 
             }
-            // p.endShape()
         }
 
         if (draw_hatches) {
             if (draw_hatch_mode==='LINES') {
                 for (const h of this.hatch_lines) {
-                    salesman_vertices.beginShape()
-                    salesman_vertices.addVertex(h[0][X], h[0][Y])
-                    salesman_vertices.addVertex(h[1][X], h[1][Y])
+                    if (Math.random() > (missing_frac)) {
+                        salesman_vertices.beginShape()
+                        salesman_vertices.addVertex(h[0][X], h[0][Y])
+                        salesman_vertices.addVertex(h[1][X], h[1][Y])
+                    }
                 } 
             } else if (draw_hatch_mode === 'CIRCLES') {
                 for (const hc of this.hatch_circles) {
-                    salesman_vertices.beginShape()
-                    for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
-                        let V = new Array(2)
-                        V[X] = hc.c[X] + hc.R * Math.sin(theta)
-                        V[Y] = hc.c[Y] + hc.R * Math.cos(theta)
-                        salesman_vertices.addVertex(V[X], V[Y])
+                    if (Math.random() > (missing_frac)) {
+                        salesman_vertices.beginShape()
+                        for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
+                            let V = new Array(2)
+                            V[X] = hc.c[X] + hc.R * Math.sin(theta)
+                            V[Y] = hc.c[Y] + hc.R * Math.cos(theta)
+                            if (Math.random() > (missing_frac))
+                                salesman_vertices.addVertex(V[X], V[Y])
+                        }
                     }
                 }
             } else if (draw_hatch_mode === 'SPHERES') {
                 for (const hs of this.hatch_spheres) {
-                    salesman_vertices.beginShape()
-                    for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
-                        let V = new Array(2)
-                        V[X] = hs.c[X] + hs.R * Math.sin(theta)
-                        V[Y] = hs.c[Y] + hs.R * Math.cos(theta)
-                        salesman_vertices.addVertex(V[X], V[Y])
+                    if (Math.random() > (missing_frac)) {
+                        salesman_vertices.beginShape()
+                        for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
+                            let V = new Array(2)
+                            V[X] = hs.c[X] + hs.R * Math.sin(theta)
+                            V[Y] = hs.c[Y] + hs.R * Math.cos(theta)
+                            salesman_vertices.addVertex(V[X], V[Y])
+                        }
                     }
                 }
 

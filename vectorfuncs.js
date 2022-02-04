@@ -34,6 +34,11 @@ const add3=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 const sub3=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot3=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const cross3=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const transform3=(v,M)=>{
+    const d=new Array(3);
+    for(c=0;c<3;c++) d[c]=(M[c]*v[0]+M[c+3]*v[1]+M[c+6]*v[2]);
+    return d;
+}
 // vec4 functions
 const add4=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3]];
 const transform4=(v,M)=>{
@@ -150,6 +155,33 @@ const rot2=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
     R[1] = -Math.sin(phi)
     R[2] = -R[1]
     R[3] = R[0]
+    return R
+}
+const rot3x=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
+    let R = new Array(9).fill(0)
+    R[0] = 1
+    R[4] = Math.cos(phi)
+    R[5] = -Math.sin(phi)
+    R[7] = -R[5]
+    R[8] = R[4]
+    return R
+}
+const rot3y=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
+    let R = new Array(9).fill(0)
+    R[4] = 1
+    R[8] = Math.cos(phi)
+    R[6] = -Math.sin(phi)
+    R[2] = -R[6]
+    R[0] = R[8]
+    return R
+}
+const rot3z=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
+    let R = new Array(9).fill(0)
+    R[8] = 1
+    R[0] = Math.cos(phi)
+    R[1] = -Math.sin(phi)
+    R[3] = -R[1]
+    R[4] = R[0]
     return R
 }
 const shuffle=(A)=> {

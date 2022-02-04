@@ -24,7 +24,7 @@
     
     setting1() {
         this.R1 = this.wh_min * 0.15
-        this.depth = 10
+        this.depth = 9
         this.path_length = 0
         this.kader = false
 
