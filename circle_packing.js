@@ -363,7 +363,10 @@ class MyCircle {
         this.hatch_circles = []
         let no_hatch_circles = Math.floor(this.R / spacing) + 1
         spacing = len2(centre_offset) / (no_hatch_circles - 1)
-        let dir_n = normalize2(centre_offset)
+        let dir_n = [1,0]
+        if (spacing != 0) {
+            dir_n = normalize2(centre_offset)
+        }
         dir_n = sub2([0,0], dir_n)
 
         for (let hci = 1; hci < no_hatch_circles-1; hci++) {
@@ -381,7 +384,10 @@ class MyCircle {
         let no_hatch_circles = Math.floor(this.R / spacing) + 1
 
         spacing = len2(center_offset) / (no_hatch_circles - 1)
-        let dir_n = normalize2(center_offset)
+        let dir_n = [1,0]
+        if (spacing != 0) {
+            dir_n = normalize2(center_offset)
+        }
         dir_n = sub2([0,0], dir_n)
 
         for (let hci = 1; hci < no_hatch_circles-1; hci++) {
