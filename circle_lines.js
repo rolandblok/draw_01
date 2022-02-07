@@ -121,23 +121,28 @@ class circle_lines  extends Drawer{
         }
 
 
-        let c_ph1 = this.ph1
-        let c_ph2 = this.ph2
         let R = this.R1_perc * this.wh_min / 200
+
+        let my_xagon = new Xagon(Math.PI*R*R, 5)
+
         let step_ph1 = (this.ph1_end - this.ph1)/this.no_lines
         let step_ph2 = (this.ph2_end - this.ph2)/this.no_lines
         for (let i = 0; i < this.no_lines; i ++){
             p.beginShape()
 
-
-            let x =  R * p.sin(i*step_ph1 + this.ph1)
-            let y =  R * p.cos(i*step_ph1 + this.ph1)
-            this.vertex_middle(p, x, y)
+            let V = new Array(2)
+            if (true){
+                V[X] =  R * p.sin(i*step_ph1 + this.ph1)
+                V[Y] =  R * p.cos(i*step_ph1 + this.ph1)
+            } else {
+                V = my_xagon.getXY((i*step_ph1 + this.ph1)/(p.TWO_PI))
+            }
+            this.vertex_middle(p, V[X], V[Y])
             no_vertices ++
 
-            x = R * p.sin(i*step_ph2 + this.ph2)
-            y = R * p.cos(i*step_ph2 + this.ph2)
-            this.vertex_middle(p, x, y)
+            V[X] = R * p.sin(i*step_ph2 + this.ph2)
+            V[Y] = R * p.cos(i*step_ph2 + this.ph2)
+            this.vertex_middle(p, V[X], V[Y])
             no_vertices ++
 
             p.endShape()

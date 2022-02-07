@@ -93,7 +93,7 @@
         this.tria_scale += 0.01*this.loop_tria_scale_d
         if (this.tria_scale > 1) {
             this.loop_tria_scale_d = -1
-        } else if (this.tria_scale < 0.5) {
+        } else if (this.tria_scale < 0.2) {
             this.loop_tria_scale_d = 1
         }
         this.Rx = this.loop_t * 2 * Math.PI/1000
