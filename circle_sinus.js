@@ -12,6 +12,7 @@ class circle_sinus extends Drawer {
         this.gui_folder_draw_options.add(this, 'S2').onChange(function (v) { cvs.draw() }).min(0).step(1).listen()
         this.gui_folder_draw_options.add(this, 'freq').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
         this.gui_folder_draw_options.add(this, 'delay').onChange(function (v) { cvs.draw() }).min(0).step(.001).listen()
+        this.gui_folder_draw_options.add(this, 'spiral').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'no_revelations').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
         this.gui_folder_draw_options.add(this, 'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
         this.gui_folder_defaults.add(this, 'setting1')
@@ -28,12 +29,14 @@ class circle_sinus extends Drawer {
     }
 
     setting1() {
+        this.kader = false
         this.R1 = 104  * this.wh_min / 1260
         this.R2 = 500  * this.wh_min / 1260
         this.S1 = 30  * this.wh_min / 1260
         this.S2 = 60  * this.wh_min / 1260
         this.freq = 11
         this.delay = 0.008
+        this.spiral = true
         this.no_revelations = 83
         this.discretizatie = 250
         cvs.draw() 
@@ -108,25 +111,52 @@ class circle_sinus extends Drawer {
 
         // Move to starting point (theta = 0)
 
-        let R = this.R1
-        let S = this.S1
-        let no_steps = this.discretizatie * this.no_revelations
-        let R_step = (this.R2 - this.R1)/ this.no_revelations
-        let S_step = (this.S2 - this.S1)/ this.no_revelations
+   
+        
 
-        // https://www.generativehut.com/post/a-step-by-step-guide-to-making-art-with-observable
-        for (let rev = 0; rev <= this.no_revelations; rev++) {
+
+
+        if (!this.spiral) {
+            let R = this.R1
+            let S = this.S1
+
+            let R_step = (this.R2 - this.R1)/ this.no_revelations
+            let S_step = (this.S2 - this.S1)/ this.no_revelations
+            for (let rev = 0; rev <= this.no_revelations; rev++) {
+                p.beginShape()
+                for (let phi = 0; phi <= p.TWO_PI + FLOATING_POINT_ACCURACY; phi += p.TWO_PI/this.discretizatie) {
+                    let X = this.my_circle_sinus(R, S, phi, rev*this.delay )
+                    let x2 = X[0] 
+                    let y2 = X[1]
+                    this.vertex_middle(p, x2,y2)
+                    no_vertices ++
+                }
+                S += S_step
+                R += R_step
+                p.endShape()
+            }
+        } else {
+            let R = this.R1
+            let S = this.S1
+            let phi = 0
+            let rev = 0
+            let no_steps = this.discretizatie * this.no_revelations
+            let R_ustep = (this.R2 - this.R1)/ no_steps
+            let S_ustep = (this.S2 - this.S1)/ no_steps
+            let phi_ustep = p.TWO_PI / this.discretizatie
+            let rev_ustep = this.delay / this.discretizatie
             p.beginShape()
-            for (let phi = 0; phi <= p.TWO_PI + FLOATING_POINT_ACCURACY; phi += p.TWO_PI/this.discretizatie) {
-
-                let X = this.my_circle_sinus(R, S, phi, rev*this.delay )
+            for (let step = 0; step < no_steps; step ++) {
+                let X = this.my_circle_sinus(R, S, phi, rev )
                 let x2 = X[0] 
                 let y2 = X[1]
                 this.vertex_middle(p, x2,y2)
                 no_vertices ++
+                S += S_ustep
+                R += R_ustep
+                phi += phi_ustep
+                rev += rev_ustep
             }
-            S += S_step
-            R += R_step
             p.endShape()
         }
 

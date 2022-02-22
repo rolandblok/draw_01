@@ -64,6 +64,7 @@ class circle_lines  extends Drawer{
 
     
     setting1() {
+        this.kader = 0
         this.discretizatie = 100
         this.no_lines = 200
         this.R1_perc = 90
