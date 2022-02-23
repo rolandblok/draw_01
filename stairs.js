@@ -13,8 +13,10 @@
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10)
         this.gui_folder_draw_options.add(this, 'depth').onChange(function (v) { cvs.draw() }).min(0).step(1)
+        this.gui_folder_draw_options.add(this, 'method', ['cube', 'line']).onChange(function (v) { cvs.draw() })
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'path_length').listen()
+        this.gui_folder_defaults.add(this, 'randofset').listen()
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
@@ -23,7 +25,10 @@
     setting1() {
         this.R1 = this.wh_min * 0.15
         this.path_length = 0
-        this.depth = 1
+        this.depth = 5
+        this.kader = false
+        this.randofset = 0.0
+        this.method = 'cube'
 
     }
     
@@ -34,8 +39,13 @@
         let no_vertices = 0
         this.path_length = 0 
 
-        console.log("rikabd" + String(this.depth))
-        this.create_plus_square(p, [this.Middle_x, this.Middle_y], this.w/2, this.depth)
+        if (this.depth >  8)
+            this.depth = 8
+        if (this.method === 'cube') {
+            this.create_blok_square(p, [this.Middle_x, this.Middle_y], this.w/2, this.depth)
+        } else {
+            this.create_min_square(p, [this.Middle_x, this.Middle_y], this.w/2, this.depth)
+        }
 
         if (false) {
             p.beginShape()
@@ -74,36 +84,147 @@
         return [x,y]
     }
 
-    // https://cdn.inchcalculator.com/wp-content/uploads/2020/12/unit-circle-chart.png
-    create_plus_square(p, center, ribbe, depth) {
-        console.log(" " + String(depth) + " c: " + String(center) + " r: " + String(ribbe))
-        if (depth > 0 ) {
+    create_blok_square(p, center, ribbe, depth) {
+        if (depth > 0) {
+            ribbe /= 2
+        }
+        let A = [center[X],         center[Y]]
+        let B = [center[X] - ribbe, center[Y] - ribbe/2]
+        let C = [center[X],         center[Y] - ribbe]
+        let D = [center[X] + ribbe, center[Y] - ribbe/2]
+        let E = [center[X] + ribbe, center[Y] + ribbe/2]
+        let F = [center[X],         center[Y] + ribbe]
+        let G = [center[X] - ribbe, center[Y] + ribbe/2]
+        if (depth > 0) {
             depth -= 1
-            ribbe = 0.5* ribbe
-            let center_n = new Array(2)
-            center_n[X] = center[X]
-            center_n[Y] = center[Y] - ribbe
-            this.create_plus_square(p, center_n, ribbe, depth)
-            center_n[X] = center[X] + ribbe
-            center_n[Y] = center[Y] + 0.5 * ribbe
-            this.create_plus_square(p, center_n, ribbe, depth)
-            center_n[X] = center[X] - ribbe
-            center_n[Y] = center[Y] + 0.5 * ribbe
-            this.create_plus_square(p, center_n, ribbe, depth)
-            
+            this.create_blok_square(p, A, ribbe/2, depth-1)
+            this.create_blok_square(p, C, ribbe, depth)
+            this.create_blok_square(p, E, ribbe, depth)
+            this.create_blok_square(p, G, ribbe, depth)
+        } else if (depth == 0) {
+            p.line(A[X], A[Y], B[X], B[Y] )
+            p.line(A[X], A[Y], D[X], D[Y] )
+            p.line(A[X], A[Y], F[X], F[Y] )
 
-        } else {
-            p.line(center[X], center[Y], center[X] + ribbe, center[Y] - ribbe/2 )
-            p.line(center[X], center[Y], center[X] - ribbe, center[Y] - ribbe/2 )
-            p.line(center[X], center[Y], center[X], center[Y] + ribbe)
+            p.beginShape()
+            p.vertex(B[X], B[Y])
+            p.vertex(C[X], C[Y])
+            p.vertex(D[X], D[Y])
+            p.vertex(E[X], E[Y])
+            p.vertex(F[X], F[Y])
+            p.vertex(G[X], G[Y])
+            p.vertex(B[X], B[Y])
+            p.endShape()
+
         }
     }
-    create_min_square(p, center, ribbe, depth) {
-        console.log(" " + String(depth) + " c: " + String(center) + " r: " + String(ribbe))
-        if (depth > 0 ) {
-        } else {
-            p.line(center[X], center[Y], center[X] + ribbe, center[Y] + ribbe/2 )
-            p.line(center[X], center[Y], center[X] - ribbe, center[Y] + ribbe/2 )
-            p.line(center[X], center[Y], center[X], center[Y] - ribbe)
+
+    // https://cdn.inchcalculator.com/wp-content/uploads/2020/12/unit-circle-chart.png
+    create_plus_square(p, center, ribbe, depth) {
+        if ((Math.random( ) * depth)  < this.randofset) {
+            depth = 0
         }
+        if (depth > 0) {
+            ribbe /= 2
+        }
+        let A = [center[X],         center[Y]]
+        let B = [center[X] - ribbe, center[Y] - ribbe/2]
+        let C = [center[X],         center[Y] - ribbe]
+        let D = [center[X] + ribbe, center[Y] - ribbe/2]
+        let E = [center[X] + ribbe, center[Y] + ribbe/2]
+        let F = [center[X],         center[Y] + ribbe]
+        let G = [center[X] - ribbe, center[Y] + ribbe/2]
+
+        if (depth > 0 ) {
+            depth -= 1         
+            ribbe /=1.1
+
+            // this.create_plus_square(p, A, ribbe/2, depth-1)
+            
+            this.create_plus_square(p, C, ribbe, depth)
+            this.create_plus_square(p, E, ribbe, depth)
+            this.create_plus_square(p, G, ribbe, depth)
+
+            this.create_min_square(p, B, ribbe, depth)
+            this.create_min_square(p, D, ribbe, depth)
+            this.create_min_square(p, F, ribbe, depth)
+        } else {
+            p.line(A[X], A[Y], B[X], B[Y] )
+            p.line(A[X], A[Y], D[X], D[Y] )
+            p.line(A[X], A[Y], F[X], F[Y] )
+        }
+    }
+
+    create_min_square(p, center, ribbe, depth) {
+        if ((Math.random( ) * depth)  < this.randofset) {
+            depth = 0
+        }
+        if (depth > 0) {
+            ribbe /= 2
+        }
+        let A = [center[X],         center[Y]]
+        let B = [center[X] - ribbe, center[Y] - ribbe/2]
+        let C = [center[X],         center[Y] - ribbe]
+        let D = [center[X] + ribbe, center[Y] - ribbe/2]
+        let E = [center[X] + ribbe, center[Y] + ribbe/2]
+        let F = [center[X],         center[Y] + ribbe]
+        let G = [center[X] - ribbe, center[Y] + ribbe/2]
+        if (depth > 0 ) {
+            depth -= 1
+            // this.create_min_square(p, A, ribbe, depth)
+            ribbe /=1.1
+            this.create_plus_square(p, B, ribbe, depth)
+            this.create_center_square(p, C, ribbe, depth)
+            this.create_plus_square(p, D, ribbe, depth)
+
+            this.create_center_square(p, E, ribbe, depth)
+            this.create_plus_square(p, F, ribbe, depth)
+            this.create_center_square(p, G, ribbe, depth)
+
+        } else {
+            p.line(A[X], A[Y], C[X], C[Y] )
+            p.line(A[X], A[Y], E[X], E[Y] )
+            p.line(A[X], A[Y], G[X], G[Y] )
+            
+        }
+    }
+    create_center_square(p, center, ribbe, depth) {
+        if ((Math.random( ) * depth)  < this.randofset) {
+            depth = 0
+        }
+        if (depth > 0) {
+            ribbe /= 2
+        }
+        let A = [center[X],         center[Y]]
+        let B = [center[X] - ribbe, center[Y] - ribbe/2]
+        let C = [center[X],         center[Y] - ribbe]
+        let D = [center[X] + ribbe, center[Y] - ribbe/2]
+        let E = [center[X] + ribbe, center[Y] + ribbe/2]
+        let F = [center[X],         center[Y] + ribbe]
+        let G = [center[X] - ribbe, center[Y] + ribbe/2]
+        if (depth > 0 ) {
+            depth -= 1
+            ribbe /=1.1
+
+            // this.create_min_square(p, A, ribbe, depth)
+            this.create_center_square(p, B, ribbe, depth)
+            this.create_min_square(p, C, ribbe, depth)
+            this.create_center_square(p, D, ribbe, depth)
+
+            this.create_min_square(p, E, ribbe, depth)
+            this.create_center_square(p, F, ribbe, depth)
+            this.create_min_square(p, G, ribbe, depth)
+        } else {
+            p.line(A[X], A[Y], B[X], B[Y] )
+            p.line(A[X], A[Y], D[X], D[Y] )
+            p.line(A[X], A[Y], F[X], F[Y] )
+
+            p.line(A[X], A[Y], C[X], C[Y] )
+            p.line(A[X], A[Y], E[X], E[Y] )
+            p.line(A[X], A[Y], G[X], G[Y] )
+            
+        }
+    }
+
+
 }
