@@ -17,7 +17,7 @@ var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
-                      'circle_packing', 'salesman', 'sierpinski', 'sphere3d', 'stairs']
+                      'circle_packing', 'salesman', 'sierpinski', 'sphere3d', 'stairs', 'umbrella']
 settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 // settings.draw_mode = settings.draw_modes[4]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
@@ -241,6 +241,8 @@ class DrawerSet {
       current_drawer = new sphere3d(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'stairs'){
       current_drawer = new stairs(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'umbrella'){
+      current_drawer = new umbrella(gui, xywh, gui_string)
     }
     
     

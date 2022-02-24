@@ -16,7 +16,7 @@
         this.gui_folder_draw_options.add(this, 'method', ['cube', 'line']).onChange(function (v) { cvs.draw() })
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'path_length').listen()
-        this.gui_folder_defaults.add(this, 'randofset').listen()
+        this.gui_folder_defaults.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
@@ -42,9 +42,9 @@
         if (this.depth >  8)
             this.depth = 8
         if (this.method === 'cube') {
-            this.create_blok_square(p, [this.Middle_x, this.Middle_y], this.w/2, this.depth)
+            this.create_blok_square(p, [this.Middle_x, this.Middle_y], this.w, this.depth)
         } else {
-            this.create_min_square(p, [this.Middle_x, this.Middle_y], this.w/2, this.depth)
+            this.create_min_square(p, [this.Middle_x, this.Middle_y], this.w, this.depth)
         }
 
         if (false) {
@@ -85,6 +85,9 @@
     }
 
     create_blok_square(p, center, ribbe, depth) {
+        if ((Math.random( ) * depth)  < this.randofset/100) {
+            depth = 0
+        }
         if (depth > 0) {
             ribbe /= 2
         }
@@ -97,7 +100,8 @@
         let G = [center[X] - ribbe, center[Y] + ribbe/2]
         if (depth > 0) {
             depth -= 1
-            this.create_blok_square(p, A, ribbe/2, depth-1)
+            let BB = [center[X] - ribbe*2, center[Y] - ribbe]
+            this.create_blok_square(p, BB, ribbe, depth)
             this.create_blok_square(p, C, ribbe, depth)
             this.create_blok_square(p, E, ribbe, depth)
             this.create_blok_square(p, G, ribbe, depth)
