@@ -422,8 +422,8 @@ class MyCircle {
 
 
     overlaps(other_circle) {
-        let dx = this.c[X] - other_circle[X]
-        let dy = this.c[Y] - other_circle[Y]
+        let dx = this.c[X] - other_circle.c[X]
+        let dy = this.c[Y] - other_circle.c[Y]
         let distance2 = dx*dx + dy*dy
         let distance2_r = (this.R + other_circle.R)**2
         return distance2 < distance2_r
