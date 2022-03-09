@@ -10,12 +10,14 @@
 
         this.setting1()
 
-
+        this.gui_folder_draw_options.add(this, 'discretizatie').onChange(function (v) { cvs.draw() }).min(10)
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10)
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() }).min(10)
-        this.gui_folder_draw_options.add(this, 'ph1').onChange(function (v) { cvs.draw() }).min(10)
-        this.gui_folder_draw_options.add(this, 'ph2').onChange(function (v) { cvs.draw() }).min(10)
-        this.gui_folder_draw_options.add(this, 'ph3').onChange(function (v) { cvs.draw() }).min(10)
+        this.gui_folder_draw_options.add(this, 'R_spiral').onChange(function (v) { cvs.draw() }).min(0)
+        this.gui_folder_draw_options.add(this, 'spiral_density').onChange(function (v) { cvs.draw() }).min(1)
+        this.gui_folder_draw_options.add(this, 'phx').onChange(function (v) { cvs.draw() }).min(0).step(1)
+        this.gui_folder_draw_options.add(this, 'phy').onChange(function (v) { cvs.draw() }).min(0).step(1)
+        this.gui_folder_draw_options.add(this, 'phz').onChange(function (v) { cvs.draw() }).min(1).step(1)
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'path_length').listen()
         this.gui_folder_defaults.open()
@@ -24,11 +26,14 @@
     }
     
     setting1() {
+        this.discretizatie = 10000
         this.R1 = this.wh_min * 0.45
         this.R2 = this.wh_min * 0.05
-        this.ph1 = 1
-        this.ph2 = 1
-        this.ph3 = 1
+        this.R_spiral = 10
+        this.spiral_density = 300
+        this.phx = 3
+        this.phy = 2
+        this.phz = 1
 
         this.path_length = 0
 
@@ -42,44 +47,33 @@
         this.path_length = 0 
 
 
+        p.beginShape()
+        let V_pref = null
+        for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / this.discretizatie) {
 
+            let V = [this.R1,0,0]
+            V[X] = this.R1 + this.R_spiral*Math.cos(theta*this.spiral_density)
+            V[Z] =           this.R_spiral*Math.sin(theta*this.spiral_density)
 
-        if (true) {
-            p.beginShape()
-            let V_pref = null
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 1000) {
-                        // DEBUG sinus
-                        let V = this.my_circle_sinus(this.R1, theta)
-                        this.vertex_middle(p, V[0], V[1])
-                        no_vertices ++
+            let Rz = rot3z(this.phz*theta)
+            V = transform3(V, Rz)
 
-                        if (V_pref !== null) {
-                            this.path_length += len2(sub2(V, V_pref))
-                        }
-                        V_pref = V
+            let Rm = rot3(this.phx*theta, this.phy*theta, 0 )
+            V = transform3(V, Rm)
+
+            this.vertex_middle(p, V[0], V[1])
+            no_vertices ++
+
+            if (V_pref !== null) {
+                this.path_length += len2(sub2(V, V_pref))
             }
-            p.endShape()
+            V_pref = V
         }
+        p.endShape()
 
         return no_vertices
     }
 
-
-    /**
-     * sinus circle around zero, radius R, sinus extra scale S, sinus freq and phi
-     * @param {*} R 
-     * @param {*} S 
-     * @param {*} freq 
-     * @param {*} phi 
-     * @returns 
-     */
-    my_circle_sinus(R1, phi) {
-        // https://upload.wikimedia.org/wikipedia/commons/4/4c/Unit_circle_angles_color.svg
-        let x,y,z
-        x = R1 * Math.sin(phi) * Math.cos(5*phi)
-        y = R1 * Math.cos(phi) * Math.sin(5*phi)
-        z = R1 * Math.cos(phi)
-        return [x,y]
-    }
+    
 }
 

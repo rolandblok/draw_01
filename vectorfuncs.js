@@ -39,7 +39,13 @@ const transform3=(v,M)=>{
     for(c=0;c<3;c++) d[c]=(M[c]*v[0]+M[c+3]*v[1]+M[c+6]*v[2]);
     return d;
 }
-// vec4 functions
+const multiply3m=(a,b)=>{
+    const d=new Float32Array(9);
+    for(let c=0;9>c;c+=3)
+        for(let e=0;3>e;e++)
+            d[c+e]=b[c+0]*a[0+e]+b[c+1]*a[3+e]+b[c+2]*a[6+e];
+    return d;
+}// vec4 functions
 const add4=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3]];
 const transform4=(v,M)=>{
     const d=new Float32Array(3);
@@ -184,6 +190,13 @@ const rot3z=(phi)=>{  // https://en.wikipedia.org/wiki/Rotation_matrix
     R[4] = R[0]
     return R
 }
+const rot3=(phix, phiy, phiz)=>{
+    mx = rot3x(phix)
+    my = rot3y(phiy)
+    mz = rot3z(phiz)
+    return multiply3m(mz,multiply3m(my, mx))
+}
+
 const shuffle=(A)=> {
     for (let i = 0; i < A.length - 1; i ++) {
         let j = Math.floor( Math.random() * A.length )
