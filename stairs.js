@@ -17,6 +17,12 @@
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'path_length').listen()
         this.gui_folder_defaults.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_defaults.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_defaults.add(this, 'optimize_path')
+        this.gui_folder_defaults.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
+        this.gui_folder_defaults.add(this, 'path_optimized').listen()
+        this.gui_folder_defaults.add(this, 'path_length').listen()
+
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
 
@@ -29,28 +35,30 @@
         this.kader = false
         this.randofset = 0.0
         this.method = 'cube'
+        this.draw_path = 'false'
+        this.path_optimized = 'false'
+        this.path_length = 0
 
     }
-    
+    optimize_path() {
 
-    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
-        super.draw(p ,fgc,bgc)
+    }
 
-        let no_vertices = 0
-        this.path_length = 0 
+    generate() {
+        this.salesman_vertices = new SalesmanVerticesNodeSet()
 
         if (this.depth >  8)
             this.depth = 8
         if (this.method === 'cube') {
-            this.create_blok_square(p, [this.Middle_x, this.Middle_y], this.w, this.depth)
+            this.create_blok_square(this.salesman_vertices, [this.Middle_x, this.Middle_y], this.w, this.depth)
         } else {
-            this.create_min_square(p, [this.Middle_x, this.Middle_y], this.w, this.depth)
+            this.create_min_square(this.salesman_vertices, [this.Middle_x, this.Middle_y], this.w, this.depth)
         }
 
         if (false) {
-            p.beginShape()
+            this.salesman_vertices.beginShape()
             let V_pref = null
-            for (let theta = 0; theta <= p.TWO_PI + FLOATING_POINT_ACCURACY; theta += p.TWO_PI / 100) {
+            for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta += 2*Math.PI / 100) {
                         // DEBUG sinus
                         let V = this.my_circle_sinus(this.R1, theta)
                         this.vertex_middle(p, V[0], V[1])
@@ -61,10 +69,19 @@
                         }
                         V_pref = V
             }
-            p.endShape()
+            // p.endShape()
         }
 
         return no_vertices
+    }
+
+    draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
+        super.draw(p ,fgc,bgc)
+
+        let ver_dist = this.salesman_vertices.draw(p, this.draw_path)
+
+        this.path_length = ver_dist[1]
+        return ver_dist[0]
     }
 
 

@@ -358,6 +358,16 @@ class SalesmanVerticesNodeSet {
         this.vertices_nodes.slice(-1)[0].addVertex(x,y)
         
     }
+    endShape() {
+        return
+    }
+
+    line(xs,ys, xe,ye) {
+        this.beginShape()
+        this.addVertex(xs,ys)
+        this.addVertex(xe,ye)
+        this.endShape()
+    }
 
     optimizePath() {
         if (!this.optimized) {
