@@ -358,6 +358,10 @@ class SalesmanVerticesNodeSet {
         this.vertices_nodes.slice(-1)[0].addVertex(x,y)
         
     }
+    vertex(x,y) {
+        this.addVertex(x,y)
+        
+    }
     endShape() {
         return
     }

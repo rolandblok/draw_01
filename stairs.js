@@ -8,44 +8,48 @@
         let name = "stairs"
         super(name, gui, xywh, sub_gui)
 
-        this.setting1()
+        this.setting1(false)
 
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() }).min(10)
         this.gui_folder_draw_options.add(this, 'depth').onChange(function (v) { cvs.draw() }).min(0).step(1)
+        this.gui_folder_draw_options.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'method', ['cube', 'line']).onChange(function (v) { cvs.draw() })
-        this.gui_folder_defaults.add(this, 'setting1')
-        this.gui_folder_defaults.add(this, 'path_length').listen()
-        this.gui_folder_defaults.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
-        this.gui_folder_defaults.add(this, 'randofset').onChange(function (v) { cvs.draw() }).listen()
-        this.gui_folder_defaults.add(this, 'optimize_path')
-        this.gui_folder_defaults.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
-        this.gui_folder_defaults.add(this, 'path_optimized').listen()
-        this.gui_folder_defaults.add(this, 'path_length').listen()
-
-        this.gui_folder_defaults.open()
+        this.gui_folder_draw_options.add(this, 'generate')
+        this.gui_folder_draw_options.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
+        this.gui_folder_draw_options.add(this, 'optimize_path')
+        this.gui_folder_draw_options.add(this, 'path_length').listen()
+        this.gui_folder_draw_options.add(this, 'path_optimized').listen()
         this.gui_folder_draw_options.open()
+
+        this.gui_folder_defaults.add(this, 'setting1')
+        this.gui_folder_defaults.open()
 
     }
     
-    setting1() {
+    setting1(redraw=true) {
         this.R1 = this.wh_min * 0.15
         this.path_length = 0
         this.depth = 5
         this.kader = false
         this.randofset = 0.0
         this.method = 'cube'
-        this.draw_path = 'false'
-        this.path_optimized = 'false'
+        this.draw_path = false
+        this.path_optimized = false
         this.path_length = 0
+        this.generate(redraw)
+
 
     }
     optimize_path() {
-
+        this.salesman_vertices.optimizePath()
+        this.path_optimized = true
+        cvs.draw()
     }
 
-    generate() {
+    generate(redraw=true) {
         this.salesman_vertices = new SalesmanVerticesNodeSet()
+        this.path_optimized = false
 
         if (this.depth >  8)
             this.depth = 8
@@ -72,7 +76,10 @@
             // p.endShape()
         }
 
-        return no_vertices
+        if (redraw) {
+            cvs.draw()
+        }
+
     }
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
