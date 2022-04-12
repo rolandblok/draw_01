@@ -5,6 +5,7 @@ class multi_sinus extends Drawer {
         super('multi sinus options',gui, xywh, sub_gui)
 
         this.setting1(false)
+        this.discretizatie = 250
 
         this.gui_folder_draw_options.add(this, 'R1').onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this, 'R2').onChange(function (v) { cvs.draw() })
@@ -42,7 +43,7 @@ class multi_sinus extends Drawer {
         this.R1 = this.wh_min * 0.15
         this.R2 = this.wh_min * 0.45
         this.no_lines = 125
-        this.discretizatie = 250
+        this.discretizatie = 1250
         this.randseed = 0
         this.no_sinusus = 50
         this.sinus_scale = 5
@@ -62,7 +63,7 @@ class multi_sinus extends Drawer {
         this.R1 = this.wh_min * 0.15
         this.R2 = this.wh_min * 0.45
         this.no_lines = 105
-        this.discretizatie = 250
+        this.discretizatie = 1250
         this.randseed = 32
         this.no_sinusus = 14
         this.sinus_scale = 6.7
