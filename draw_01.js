@@ -19,7 +19,7 @@ settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','ci
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
                       'circle_packing', 'salesman', 'sierpinski', 'sphere3d', 'phase_circle', 'stairs', 'umbrella', 'sphere_spiral']
 // settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
-settings.draw_mode = settings.draw_modes[12]
+settings.draw_mode = settings.draw_modes[8]
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })

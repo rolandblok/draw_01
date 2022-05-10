@@ -14,14 +14,16 @@ class read_json extends Drawer{
         this.gui_folder_draw_options.add(this, 'no_endShapes').listen()
         this.gui_folder_draw_options.add(this, 'file_name').listen()
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_draw_options.add(this,'z_log').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive','two_colors']).onChange(function (v) { cvs.draw() })
-        this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(0.0001).listen()
+        this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(1).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
         this.gui_folder_draw_options.add(this,'load_json')
         this.gui_folder_defaults.add(this, 'setting_test')
         this.gui_folder_defaults.add(this, 'setting_hoogtekaart')
+        this.gui_folder_defaults.add(this, 'setting_hoogtekaart_log')
         if(sub_gui === ' 0_0'){
             this.gui_folder_defaults.open()
             this.gui_folder_draw_options.open()
@@ -60,6 +62,7 @@ class read_json extends Drawer{
         this.my_data = []
         this.file_name = "data/data.json"
         this.z_as_hoogtekaart = false;
+        this.z_log = false;
         this.do_centre_and_scale = false
         this.z_scale = 1
         this.load_json()
@@ -69,7 +72,20 @@ class read_json extends Drawer{
         this.file_name = "data/hoogtekaart25.json"
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
-        this.z_scale = 0.01
+        this.z_scale = 5
+        this.z_log = false;
+        this.kader = false
+
+        this.load_json()
+        
+    }
+    setting_hoogtekaart_log() {
+        this.my_data = []
+        this.file_name = "data/hoogtekaart25.json"
+        this.z_as_hoogtekaart = true;
+        this.do_centre_and_scale = true
+        this.z_scale = 16
+        this.z_log = true;
         this.kader = false
 
         this.load_json()
@@ -108,7 +124,12 @@ class read_json extends Drawer{
                                     map_level_draw = false
                             }
 
-                            y_vertex  = my_vertex[Y] - this.z_scale*my_vertex[Z]
+                            let z = my_vertex[Z]
+                            if (this.z_log){
+                                z = Math.log(2+z)   
+                            }
+                            y_vertex  = my_vertex[Y] - this.z_scale*z
+                            
 
                             if ((map_level_draw) && (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex))) {
                                 if (!shape_active) {
@@ -160,16 +181,20 @@ class read_json extends Drawer{
         if (this.my_data.length > 0) {
 
             // find the min and max values
-            let x_min = this.my_data[0][0][0]
+            let x_min = this.my_data[0][0][X]
             let x_max = x_min
-            let y_min = this.my_data[0][1][0]
+            let y_min = this.my_data[0][0][Y]
             let y_max = y_min
+            let z_min = this.my_data[0][0][Z]
+            let z_max = z_min
             for (const shape of this.my_data) {
                 for (const V of shape) {
-                    if (V[0] < x_min ) x_min = V[0]
-                    if (V[0] > x_max ) x_max = V[0]
-                    if (V[1] < y_min ) y_min = V[1]
-                    if (V[1] > y_max ) y_max = V[1]
+                    if (V[0] < x_min ) x_min = V[X]
+                    if (V[0] > x_max ) x_max = V[X]
+                    if (V[1] < y_min ) y_min = V[Y]
+                    if (V[1] > y_max ) y_max = V[Y]
+                    if (V[Z] < z_min ) z_min = V[Z]
+                    if (V[Z] > z_max ) z_max = V[Z]
                 }
             }
 
@@ -228,6 +253,16 @@ class read_json extends Drawer{
                 }
                 this.my_data = new_shapes_av
             }
+
+            
+            for (const shape of this.my_data) {
+                for (const V of shape) {
+                    V[Z] =  ((V[Z] - z_min)/-z_min -1)
+                }
+            }
+
+            console.log("extra z " + String(z_min) + " " +  + String(z_max))
+
         }
 
         cvs.draw() 
