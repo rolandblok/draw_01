@@ -17,19 +17,60 @@ class read_json extends Drawer{
         this.gui_folder_draw_options.add(this,'z_log').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive','two_colors']).onChange(function (v) { cvs.draw() })
         this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(1).listen()
+        this.gui_folder_draw_options.add(this,'water_level').onChange(function (v) { cvs.draw() }).step(0.05).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
         this.gui_folder_draw_options.add(this,'load_json')
+
+        this.loop = false
+        this.gui_folder_draw_options.add(this,'loop').onChange(function (v) { cvs.draw() })
+        this.loop_step = 0.05
+        this.gui_folder_draw_options.add(this,'loop_step').onChange(function (v) { cvs.draw() }).min(0.01).step(.01).listen()
+        this.loop_z_start = -1
+        this.gui_folder_draw_options.add(this,'loop_z_start')
+        this.loop_z_end   = 6
+        this.gui_folder_draw_options.add(this,'loop_z_end')
+
+        this.capture_on = false
+        this.gui_folder_draw_options.add(this,'capture_this')
+
+
+
         this.gui_folder_defaults.add(this, 'setting_test')
         this.gui_folder_defaults.add(this, 'setting_hoogtekaart')
         this.gui_folder_defaults.add(this, 'setting_hoogtekaart_log')
+        this.gui_folder_defaults.add(this, 'setting_hoogtekaart_log2')
         if(sub_gui === ' 0_0'){
             this.gui_folder_defaults.open()
             this.gui_folder_draw_options.open()
         }
 
+        this.capturer = new CCapture({
+            framerate: 5,
+            format: "png",
+            name: "movie",
+            quality: 100,
+            verbose: true,
+          });
+    
+
     }
+
+    capture_this() {
+        // https://stubborncode.com/posts/how-to-export-images-and-animations-from-p5-js/
+        if (!this.capture_on) {
+            this.water_level = this.loop_z_start
+            // cvs.resizeCanvas(1024,1024)  // https://stackoverflow.com/questions/48036719/p5-js-resize-canvas-height-when-div-changes-height
+            cvs.resizeCanvas(1300,1300)  // https://stackoverflow.com/questions/48036719/p5-js-resize-canvas-height-when-div-changes-height
+            this.capture_on = true
+            this.capturer.start()
+            this.loop = true
+            cvs.draw()
+        }
+        //  d:\ffmpeg\bin\ffmpeg -framerate 15  -i %07d.png -vf format=yuv420p movie.mp4
+        // ffmpeg -framerate 60  -i %07d.png -vf format=yuv420p movie.mp4
+    }    
 
     load_done(request, my_obj) {
         return function() {
@@ -40,7 +81,6 @@ class read_json extends Drawer{
             if (my_obj.do_centre_and_scale) {
                 my_obj.centre_and_scale();
             }
-
 
             cvs.draw()
         }
@@ -65,6 +105,7 @@ class read_json extends Drawer{
         this.z_log = false;
         this.do_centre_and_scale = false
         this.z_scale = 1
+        this.water_level = 0
         this.load_json()
     }
     setting_hoogtekaart() {
@@ -75,6 +116,7 @@ class read_json extends Drawer{
         this.z_scale = 5
         this.z_log = false;
         this.kader = false
+        this.
 
         this.load_json()
         
@@ -91,9 +133,30 @@ class read_json extends Drawer{
         this.load_json()
         
     }
+    setting_hoogtekaart_log2() {
+        this.my_data = []
+        this.file_name = "data/hoogtekaart25.json"
+        this.z_as_hoogtekaart = true;
+        this.do_centre_and_scale = true
+        this.z_scale = 16
+        this.z_log = true;
+        this.kader = false
+        this.map_level = 'two_colors'
+
+        this.load_json()
+        
+    }
     
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p, fgc, bgc)
+
+        if (this.loop) { 
+            p.loop() 
+        } else {
+            p.noLoop()
+        } 
+        
+
 
         let no_vertices = 0
 
@@ -102,12 +165,13 @@ class read_json extends Drawer{
         let active_map_level = this.map_level.slice()
         if (this.map_level === 'two_colors') {
             active_map_level = 'negative'.slice()
-            p.stroke([0,0,255])
+            p.stroke([150,150,255])
             no_draws = 2
         }
         if (active_map_level === 'negative')
-            p.stroke([0,0,255])
+            p.stroke([150,150,255])
 
+        p.strokeWeight(2)
         this.no_endShapes = 0
         while (no_draws > 0 ) {
             let latest_height = new LatestHeight()
@@ -119,8 +183,8 @@ class read_json extends Drawer{
                         let y_vertex = 0
                         let map_level_draw = true
                         if (this.z_as_hoogtekaart) {
-                            if ((my_vertex[Z] < 0) && (active_map_level === 'positive' )  ||
-                                (my_vertex[Z] > 0) && (active_map_level === 'negative' )     ) { 
+                            if ((my_vertex[Z] < this.water_level) && (active_map_level === 'positive' )  ||
+                                (my_vertex[Z] > this.water_level) && (active_map_level === 'negative' )     ) { 
                                     map_level_draw = false
                             }
 
@@ -171,6 +235,52 @@ class read_json extends Drawer{
                 active_map_level = 'positive'.slice()
                 p.stroke(fgc)
             }
+        }
+
+        if (p.isLooping()) {
+            p.stroke(fgc)
+            let loop_fraction =  ( this.water_level - this.loop_z_start) / (this.loop_z_end - this.loop_z_start)
+            let my_year = Math.round(2025 + (2050 - 2025) * loop_fraction)
+
+
+            p.textSize(30);
+            p.strokeWeight(1)
+            p.fill((150,150,150))
+            p.text("roland 22", 70, 1250)
+            p.textSize(32);
+            p.text("The             and the Upper Lands", 70, 1220)
+            let my_blue = 150 + (255-150) * loop_fraction
+            p.fill([150,150,my_blue])
+            p.text("       Nether", 70, 1220)
+
+            p.strokeWeight(4)
+            p.textSize(128);
+            p.text(my_year, 80, 220); 
+
+            this.water_level += this.loop_step
+            if (this.capture_on) {
+                this.capturer.capture(cvs.canvas)
+                if (this.water_level < this.loop_z_start) {
+                    console.log("capture done")
+                    this.capturer.stop()
+                    this.capturer.save()
+                    this.loop = false
+                    p.noLoop()
+                    this.capture_on = false
+                    p.resize(window.innerWidth, window.innerHeight)
+                }
+            }
+            if (this.water_level < this.loop_z_start) {
+                this.water_level  = this.loop_z_start
+                this.loop_step = - this.loop_step
+            }
+            if (this.water_level > this.loop_z_end) {
+                this.water_level  = this.loop_z_end
+                this.loop_step = - this.loop_step
+            }
+
+
+
         }
 
         return no_vertices
