@@ -1,13 +1,15 @@
 import processing.svg.*;
 
+import java.util.*;
 
 float FLOATING_POINT_ACCURACY = 1.0e-5;
-
 
 CirclePacking cpack;
 
 void setup() {
-  //size(800, 800, SVG, "filename.svg");
+
+   //println(System.getProperty("java.version"));
+  //size(1600, 800, SVG, "filename.svg");
   size(1600,800);
   cpack = new CirclePacking();
 }
@@ -15,11 +17,13 @@ void setup() {
 void draw() {
   clear();
   background(255);
+  noFill();
   // Draw something good here
   cpack.draw();
 
+  noLoop();
   // Exit the program
-  println("Finished.");
+  //delay(3000);
   //exit();
 }
 
@@ -31,17 +35,34 @@ void draw() {
  */
  class CirclePacking  {
    ArrayList<MyCircle> my_circles ;
-   float Rmax, Rmin, no_circles, max_tries, missing_perc;
+   IntList my_line;
+   float Rmax, Rmin, no_circles, max_tries, missing_perc, max_line_dist, min_number_rad;
    boolean hatch_rand_center;
+   
+ PShape  skull ;
+  PShape  gear ;
+  
 
     CirclePacking() {
+      
+        skull = loadShape("skull.svg");
+       gear = loadShape("gear.svg");
+      
         my_circles = new ArrayList<MyCircle>();
+        my_line = new IntList();
          Rmax = 70;
+         max_line_dist = 170;
+         min_number_rad = 35;
         Rmin = 5;
         no_circles = 300;
-        max_tries = 1000;
+        max_tries = 10000;
         hatch_rand_center = true;
         missing_perc = 0;
+
+        for (int x = 0; x < width; x ++) {
+           int y = (int) (noise(x*0.005)*height);
+           my_line.append(y);
+        }
 
         this.fill_area_seeded();
     }
@@ -51,10 +72,43 @@ void draw() {
     void draw() {
       color fgc = color(0,0,0);
       color bgc = color(255,255,255);
+      textSize(28);
+      textAlign(CENTER,CENTER);
+      int counter = 1;
       for (MyCircle c : my_circles) {
-        
+        noFill();
+        if (c.R > min_number_rad){
+          float r = random(1);
+          
+          if (r < 0.1) {
+            shape(skull, c.c.x - c.R/2, c.c.y - c.R/2, c.R, c.R);
+            println(counter);
+            continue;
+          } else if ( r < 0.2) {
+            shape(gear, c.c.x - c.R/2, c.c.y - c.R/2, c.R, c.R);
+            continue;
+          } else {
+            fill(0);
+            pushMatrix();
+            translate( c.c.x, c.c.y);
+            rotate(90);
+            text(""+counter,0,0);
+            popMatrix();
+            counter++;
+          }
+        }
+        noFill();
         c.draw();
+
+        noFill();
       }
+
+//      beginShape();
+//      for (int x = 0; x < my_line.size(); x++) {
+//        int y = my_line.get(x);
+//        vertex(x,y);
+//      }
+//      endShape();      
     }
 
     
@@ -74,11 +128,12 @@ void draw() {
             float y = floor(height * yran);
             float x_01 = xran;
             float y_01 = yran;
-            //float pl_val = my_plasma.get_value_at_normed_xy(x_01, y_01)
-            //if ( pl_val < this.plasma_min_height) {
-            //    fails ++
-            //    continue
-            //}
+            float line_dist  = abs(y - my_line.get((int)x));
+
+            if ( line_dist > max_line_dist) {
+                fails ++;
+                continue;
+            }
 
             FloatList distances = new FloatList ();
             for (MyCircle c : my_circles) {
@@ -102,6 +157,9 @@ void draw() {
                 my_circles.add(new_circle);
             }
         }
+        Collections.sort(my_circles, Comparator.comparing((MyCircle c) -> c.x()));
+    
+        
     }
 
 
@@ -115,6 +173,9 @@ class MyCircle {
     MyCircle(PVector V, float R) {
         this.c = V;
         this.R = R;
+    }
+    float x() {
+      return c.x;
     }
 
     void draw() {
