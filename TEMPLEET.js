@@ -5,10 +5,12 @@ class Drawer {
         this.xywh = xywh
         this.gui_str = name + sub_gui
         this.gui_folder_draw_options = gui.addFolder(this.gui_str)
-        this.kader = true
+        this.kader = false
+        this.corners = false
         this.kader_width = 9
 
         this.gui_folder_draw_options.add(this,'kader').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_draw_options.add(this,'corners').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_defaults = this.gui_folder_draw_options.addFolder('defaults')
 
         this.selected = false
@@ -77,6 +79,10 @@ class Drawer {
         if (this.kader) {
             p.rect(this.Left + this.kader_width, this.Top + this.kader_width,
                  this.w-2*this.kader_width , this.h-2*this.kader_width)
+        }
+        if (this.corners) {
+            p.point(this.Left + this.kader_width, this.Top + this.kader_width)
+            p.point(this.w-2*this.kader_width , this.h-2*this.kader_width)
         }
                 
 

@@ -101,8 +101,6 @@ class sphere_band extends Drawer {
 
         p.randomSeed(this.randseed)
 
-        this.frame = 0
-
         let y_edge_offset = 100
         let y_range = this.h - 2 * y_edge_offset
         for (let l = 0; l < this.no_lines; l++) {
