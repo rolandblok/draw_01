@@ -167,8 +167,14 @@ class Rain {
 
     draw(p){
         let no_vertices = 0
+        let up_down = true
         for (let line of this.rain_lines) {
-            no_vertices += line.draw(p)
+            if (up_down) {
+                no_vertices += line.draw(p)
+            } else {
+                no_vertices += line.draw(p, true)
+            }
+            up_down = !up_down
         }
 
     }
