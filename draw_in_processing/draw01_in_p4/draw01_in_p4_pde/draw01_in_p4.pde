@@ -72,7 +72,7 @@ void draw() {
     void draw() {
       color fgc = color(0,0,0);
       color bgc = color(255,255,255);
-      textSize(28);
+      textSize(48);
       textAlign(CENTER,CENTER);
       int counter = 1;
       for (MyCircle c : my_circles) {
@@ -90,8 +90,8 @@ void draw() {
           } else {
             fill(0);
             pushMatrix();
-            translate( c.c.x, c.c.y);
-            rotate(90);
+            translate( c.c.x+8, c.c.y);
+            rotate(PI/2);
             text(""+counter,0,0);
             popMatrix();
             counter++;
