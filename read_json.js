@@ -1,4 +1,4 @@
-
+const ZLOG = Z+1
 class read_json extends Drawer{
 
     constructor(gui, xywh, sub_gui = '') {
@@ -16,8 +16,8 @@ class read_json extends Drawer{
         this.gui_folder_draw_options.add(this,'z_as_hoogtekaart').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this,'z_log').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'map_level', ['all','negative','positive','two_colors']).onChange(function (v) { cvs.draw() })
-        this.gui_folder_draw_options.add(this,'z_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(1).listen()
-        this.gui_folder_draw_options.add(this,'water_level').onChange(function (v) { cvs.draw() }).step(0.05).listen()
+        this.gui_folder_draw_options.add(this,'z2y_scale').onChange(function (v) { cvs.draw() }).min(0.00).step(1).listen()
+        this.gui_folder_draw_options.add(this,'water_level').onChange(function (v) { cvs.draw() }).step(1).listen()
         this.gui_folder_draw_options.add(this,'draw_max').onChange(function (v) { cvs.draw() }).min(2).step(1)
         this.gui_folder_draw_options.add(this,'do_average_per_pixel').listen()
         this.gui_folder_draw_options.add(this,'do_centre_and_scale').listen()
@@ -25,11 +25,15 @@ class read_json extends Drawer{
 
         this.loop = false
         this.gui_folder_draw_options.add(this,'loop').onChange(function (v) { cvs.draw() })
-        this.loop_step = 0.05
-        this.gui_folder_draw_options.add(this,'loop_step').onChange(function (v) { cvs.draw() }).min(0.01).step(.01).listen()
-        this.loop_z_start = -1
+        this.loop_step = 50
+        this.gui_folder_draw_options.add(this,'loop_step').onChange(function (v) { cvs.draw() }).min(1).step(1).listen()
+        this.show_loop_date = false
+        this.gui_folder_draw_options.add(this,'show_loop_date').onChange(function (v) { cvs.draw() })
+        this.show_z = true
+        this.gui_folder_draw_options.add(this,'show_z').onChange(function (v) { cvs.draw() })
+        this.loop_z_start = -1*626
         this.gui_folder_draw_options.add(this,'loop_z_start')
-        this.loop_z_end   = 6
+        this.loop_z_end   = 500
         this.gui_folder_draw_options.add(this,'loop_z_end')
 
         this.capture_on = false
@@ -104,7 +108,7 @@ class read_json extends Drawer{
         this.z_as_hoogtekaart = false;
         this.z_log = false;
         this.do_centre_and_scale = false
-        this.z_scale = 1
+        this.z2y_scale = 1
         this.water_level = 0
         this.load_json()
     }
@@ -113,7 +117,7 @@ class read_json extends Drawer{
         this.file_name = "data/hoogtekaart25.json"
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
-        this.z_scale = 5
+        this.z2y_scale = 5
         this.z_log = false;
         this.kader = false
         this.
@@ -126,7 +130,7 @@ class read_json extends Drawer{
         this.file_name = "data/hoogtekaart25.json"
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
-        this.z_scale = 16
+        this.z2y_scale = 16
         this.z_log = true;
         this.kader = false
 
@@ -138,7 +142,7 @@ class read_json extends Drawer{
         this.file_name = "data/hoogtekaart25.json"
         this.z_as_hoogtekaart = true;
         this.do_centre_and_scale = true
-        this.z_scale = 16
+        this.z2y_scale = 16
         this.z_log = true;
         this.kader = false
         this.map_level = 'two_colors'
@@ -171,7 +175,7 @@ class read_json extends Drawer{
         if (active_map_level === 'negative')
             p.stroke([150,150,255])
 
-        p.strokeWeight(2)
+        p.strokeWeight(1)
         this.no_endShapes = 0
         while (no_draws > 0 ) {
             let latest_height = new LatestHeight()
@@ -190,9 +194,10 @@ class read_json extends Drawer{
 
                             let z = my_vertex[Z]
                             if (this.z_log){
+                                z = my_vertex[ZLOG]
                                 z = Math.log(2+z)   
                             }
-                            y_vertex  = my_vertex[Y] - this.z_scale*z
+                            y_vertex  = my_vertex[Y] - this.z2y_scale*z
                             
 
                             if ((map_level_draw) && (latest_height.check_vis_and_add_point(my_vertex[X], y_vertex))) {
@@ -237,25 +242,45 @@ class read_json extends Drawer{
             }
         }
 
+        if (this.show_z && !p.isLooping()){
+            p.strokeWeight(1)
+            p.textSize(24);
+            p.fill((150,150,150))
+            p.stroke((150,150,150))
+            p.text("Zeespiegel "+(this.water_level<0?"":"+") + (this.water_level/100).toFixed(1) + " m", 80, 300); 
+        }
+
         if (p.isLooping()) {
             p.stroke(fgc)
             let loop_fraction =  ( this.water_level - this.loop_z_start) / (this.loop_z_end - this.loop_z_start)
             let my_year = Math.round(2025 + (2050 - 2025) * loop_fraction)
 
+            let my_blue = 150 + (255-150) * loop_fraction
+
+            p.strokeWeight(1)
+            p.textSize(24);
+            p.fill([150,150,my_blue])
+            p.stroke([150,150,my_blue])
+            p.text("Zeespiegel "+(this.water_level<0?"":"+") + (this.water_level/100).toFixed(1) + " m", 80, 300); 
+
 
             p.textSize(30);
             p.strokeWeight(1)
             p.fill((150,150,150))
-            p.text("roland 22", 70, 1250)
+            p.stroke((150,150,150))
+            p.text("Roland 22", 70, 1250)
             p.textSize(32);
-            p.text("The             and the Upper Lands", 70, 1220)
-            let my_blue = 150 + (255-150) * loop_fraction
+            p.text("The             and the Upper Lands", 70, 1200)
             p.fill([150,150,my_blue])
-            p.text("       Nether", 70, 1220)
+            p.stroke([150,150,my_blue])
+            p.text("       Nether", 70, 1200)
 
             p.strokeWeight(4)
-            p.textSize(128);
-            p.text(my_year, 80, 220); 
+            if (this.show_loop_date) {
+                p.textSize(128);
+                p.text(my_year, 80, 220); 
+            }
+
 
             this.water_level += this.loop_step
             if (this.capture_on) {
@@ -324,10 +349,9 @@ class read_json extends Drawer{
                     if (V.length == 3) new_V[2] = V[2]
                     new_shape.push(new_V)
                 }
-                new_shape.reverse()
                 new_shapes.push(new_shape)
             }
-            new_shapes.reverse()
+            new_shapes.reverse()   // <-- We need to draw from down to up to check visibility
             this.my_data = new_shapes
 
             // average the x values per pixel to prevent save mega files
@@ -358,16 +382,18 @@ class read_json extends Drawer{
                         new_V_av[2] =  new_shape_sums_dict[i][2] / new_shape_sums_dict[i][4] 
                         new_shape_av.push(new_V_av)
                     }
-
+                    new_shape_av.reverse()
                     new_shapes_av.push(new_shape_av)
                 }
                 this.my_data = new_shapes_av
             }
 
-            
+
+            console.log("z_min : " + z_min)
+            console.log("z_max : " + z_max)
             for (const shape of this.my_data) {
                 for (const V of shape) {
-                    V[Z] =  ((V[Z] - z_min)/-z_min -1)
+                    V[ZLOG] =  ((V[Z] - z_min)/-z_min -1)
                 }
             }
 

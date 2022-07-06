@@ -59,10 +59,15 @@ class MyLine {
     }
 
 
-    draw(p) {
+    draw(p, reverse = false) {
         p.beginShape()
-        p.vertex(this.p[0][X], this.p[0][Y])
-        p.vertex(this.p[1][X], this.p[1][Y])
+        if (reverse) {
+            p.vertex(this.p[1][X], this.p[1][Y])
+            p.vertex(this.p[0][X], this.p[0][Y])
+        } else {
+            p.vertex(this.p[0][X], this.p[0][Y])
+            p.vertex(this.p[1][X], this.p[1][Y])
+        }
         p.endShape()
         return 2
     }
