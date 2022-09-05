@@ -19,7 +19,9 @@
         this.gui_folder_draw_options.add(this, 'max_length').onChange(function (v) { cvs.draw() }).listen().min(0)
         this.gui_folder_draw_options.add(this, 'min_open').onChange(function (v) { cvs.draw() }).listen().min(0)
         this.gui_folder_draw_options.add(this, 'max_open').onChange(function (v) { cvs.draw() }).listen().min(0)
+        this.gui_folder_draw_options.add(this, 'rotation').onChange(function (v) { cvs.draw() }).listen().step(0.1)
         this.gui_folder_draw_options.add(this, 'draw_rain').onChange(function (v) { cvs.draw() }).listen()
+        this.gui_folder_draw_options.add(this, 'up_down_drawing').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_draw_options.add(this, 'draw_umbrellas').onChange(function (v) { cvs.draw() }).listen()
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'setting2')
@@ -41,7 +43,10 @@
         this.max_length = 25
         this.min_open = 100
         this.max_open = 120
-        this.draw_rain = true;
+        this.rotation = 0
+        this.draw_rain = true
+        this.up_down_drawing = false;
+        this.up_down = false;
         this.draw_umbrellas = true;
         this.regen(redraw)
 
@@ -104,10 +109,12 @@
         this.path_length = 0 
 
         if (this.draw_rain)
+            this.my_rain.up_down_drawing = this.up_down_drawing
             this.my_rain.draw(p)
 
         if (this.draw_umbrellas) {
             for (let my_umbrella of this.my_umbrellas) {
+                my_umbrella.rotation = this.rotation
                 no_vertices += my_umbrella.draw(p)
             }
         }
@@ -122,6 +129,7 @@
 
 class Rain {
     constructor(umbrellas, width, height, settings) {
+        this.up_down_drawing = false
         let rain_lines = []
         for (let x = 1; x < width; x += settings.rain_dist ) {
             let my_line = new MyLine([x,10], [x,height])
@@ -172,39 +180,45 @@ class Rain {
             if (up_down) {
                 no_vertices += line.draw(p)
             } else {
-                no_vertices += line.draw(p, true)
+                no_vertices += line.draw(p, this.up_down_drawing)
             }
             up_down = !up_down
+            no_vertices += 2
         }
-
+        return no_vertices
     }
 
 }
 
 class MyUmbrella {
-    constructor(C,R) {
+    constructor(C,R, rot=0) {
         this.C = [...C]
         this.R = R
+        this.rotation = rot
         this.bound_sphere = new MySphere(C,R)
-
 
     }
     draw(p) {
         let no_vertices = 0;
+        // p.push()
+        // p.translate(this.C[0],this.C[1])
+        // p.rotate(this.rotation)
         let C = this.C
+        // C = [0,0]
         let R = this.R
         p.beginShape()
-        no_vertices += this.my_circle_from_to(p, C,R,0,p.PI, false)
-        no_vertices += this.my_circle_from_to(p, [C[X]-R*2/3, C[Y]], R/3,p.PI,0, false)
-        no_vertices += this.my_circle_from_to(p, C,R/3,p.PI,0, false)
-        no_vertices += this.my_circle_from_to(p, [C[X]+R*2/3, C[Y]], R/3,p.PI,0, false)
+        no_vertices += this.my_circle_from_to(p, C,R,0,p.PI,this.rotation, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]-R*2/3, C[Y]], R/3,p.PI,0,this.rotation, false)
+        no_vertices += this.my_circle_from_to(p, C,R/3,p.PI,0,this.rotation, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]+R*2/3, C[Y]], R/3,p.PI,0,this.rotation, false)
         p.endShape()
         p.beginShape()
         p.vertex(C[X], C[Y] - R/3)
         p.vertex(C[X], C[Y] + R-R/6)
         no_vertices += 2
-        no_vertices += this.my_circle_from_to(p, [C[X]+R/6, C[Y]+R-R/6], R/6,p.PI, p.TWO_PI, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]+R/6, C[Y]+R-R/6], R/6,p.PI, p.TWO_PI,this.rotation, false)
         p.endShape()
+        // p.pop()
         
 
         return no_vertices;    
@@ -239,7 +253,7 @@ class MyUmbrella {
         return [x,y]
         }   
 
-    my_circle_from_to(p, C,R,phi_start, phi_end, do_begin_end_shape=true) {
+    my_circle_from_to(p, C,R,phi_start, phi_end, rotation, do_begin_end_shape=true) {
         let no_vertices = 0;
         if (do_begin_end_shape) p.beginShape()
         let V_pref = null

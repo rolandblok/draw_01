@@ -38,6 +38,7 @@
         this.gui_folder_defaults.add(this, 'setting_LINES')
         this.gui_folder_defaults.add(this, 'setting_CIRCLES')
         this.gui_folder_defaults.add(this, 'setting_SPHERE')
+        this.gui_folder_defaults.add(this, 'setting_umbrella')
         this.gui_folder_defaults.add(this, 'fill_area_seeded')
         this.gui_folder_defaults.add(this, 'fill_area_random')
         this.gui_folder_defaults.add(this, 'optimize_path')
@@ -126,6 +127,35 @@
         this.missing_perc = 0
 
         this.hatch_mode = 'SPHERES'
+        this.kader = false
+        this.path_optimized = false
+        this.path_length = 0
+        this.draw_path = false
+        this.rand_seed = 0
+        this.fill_area_seeded(redraw)
+
+    }
+
+    setting_umbrella(redraw=true) {
+        this.Rmax = 70
+        this.Rmin = 5
+        this.no_circles = 300
+        this.max_tries = 1000
+        this.hatch_min = 3
+        this.hatch_max = 5
+        this.plasma_depth = 7
+        this.plasma_min_height = 0.5
+        this.draw_circumferences = true
+        this.draw_hatches = true
+        this.hatch_rand_center = false
+        this.hatch_rotation_mode = 'FOCUS_POS'
+        this.hatch_rot_pos_x = 0.7
+        this.hatch_rot_pos_y = 0.3
+        this.hatch_rotation_angle = 0
+        this.hatch_max_off = 0.7
+        this.missing_perc = 0
+
+        this.hatch_mode = 'umbrellas'
         this.kader = false
         this.path_optimized = false
         this.path_length = 0
@@ -275,6 +305,12 @@ class MyCircle {
 
     draw(salesman_vertices, draw_circumference = true, draw_hatches=false, draw_hatch_mode='LINES', missing_frac = 0) {
         let no_vertices = 0
+
+        if (draw_hatch_mode == 'umbrellas') {
+            let umbr = new MyUmbrella(this.c, this.R)
+            no_vertices = umbr.draw(salesman_vertices)
+            return no_vertices
+        }
 
 
         if (draw_circumference) {
