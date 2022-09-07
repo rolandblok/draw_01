@@ -200,25 +200,25 @@ class MyUmbrella {
     }
     draw(p) {
         let no_vertices = 0;
-        // p.push()
-        // p.translate(this.C[0],this.C[1])
-        // p.rotate(this.rotation)
-        let C = this.C
-        // C = [0,0]
+        p.push()
+        p.translate(this.C[0],this.C[1])
+        p.rotate(this.rotation)
+            let C = this.C
+        C = [0,0]
         let R = this.R
         p.beginShape()
-        no_vertices += this.my_circle_from_to(p, C,R,0,p.PI,this.rotation, false)
-        no_vertices += this.my_circle_from_to(p, [C[X]-R*2/3, C[Y]], R/3,p.PI,0,this.rotation, false)
-        no_vertices += this.my_circle_from_to(p, C,R/3,p.PI,0,this.rotation, false)
-        no_vertices += this.my_circle_from_to(p, [C[X]+R*2/3, C[Y]], R/3,p.PI,0,this.rotation, false)
+        no_vertices += this.my_circle_from_to(p, C,R,0,p.PI, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]-R*2/3, C[Y]], R/3,p.PI,0, false)
+        no_vertices += this.my_circle_from_to(p, C,R/3,p.PI,0, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]+R*2/3, C[Y]], R/3,p.PI,0, false)
         p.endShape()
         p.beginShape()
         p.vertex(C[X], C[Y] - R/3)
         p.vertex(C[X], C[Y] + R-R/6)
         no_vertices += 2
-        no_vertices += this.my_circle_from_to(p, [C[X]+R/6, C[Y]+R-R/6], R/6,p.PI, p.TWO_PI,this.rotation, false)
+        no_vertices += this.my_circle_from_to(p, [C[X]+R/6, C[Y]+R-R/6], R/6,p.PI, p.TWO_PI, false)
         p.endShape()
-        // p.pop()
+        p.pop()
         
 
         return no_vertices;    
@@ -253,7 +253,7 @@ class MyUmbrella {
         return [x,y]
         }   
 
-    my_circle_from_to(p, C,R,phi_start, phi_end, rotation, do_begin_end_shape=true) {
+    my_circle_from_to(p, C, R, phi_start, phi_end, do_begin_end_shape=true) {
         let no_vertices = 0;
         if (do_begin_end_shape) p.beginShape()
         let V_pref = null

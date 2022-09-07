@@ -19,15 +19,15 @@ settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','ci
                         'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
                       'circle_packing', 'salesman', 'sierpinski', 'sphere3d', 'phase_circle', 'stairs', 'umbrella', 'sphere_spiral']
 // settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
-settings.draw_mode = 'umbrella'
+settings.draw_mode = 'circle_packing'
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
 settings.kader = false
 gui.add(settings, 'kader').onChange(function (v) { cvs.draw() })
-settings.square = true
+settings.square = false
 gui.add(settings, 'square').onChange(function (v) { cvs.draw() })
-settings.aspect = 0.65
+settings.aspect = 0.707
 gui.add(settings, 'aspect').step(.01).min(0.5).max(1.5).onChange(function (v) { cvs.draw() })
 settings.grid_edge = 2
 settings.grid_x = 1

@@ -299,6 +299,7 @@ class SalesmanVerticesNode extends SalesNode {
         super()
         this.vertices = []
     }
+
     addVertex(x,y) {
         let V = [x,y]
         this.vertices.push(V)
@@ -354,9 +355,15 @@ class SalesmanVerticesNodeSet {
         this.best_order_indices.push(this.vertices_nodes.length)
         this.vertices_nodes.push(new SalesmanVerticesNode())
     }
+    vertex(x,y){
+        this.addVertex(x,y)
+    }
     addVertex(x,y) {
         this.vertices_nodes.slice(-1)[0].addVertex(x,y)
         
+    }
+    endShape() {
+        //
     }
     vertex(x,y) {
         this.addVertex(x,y)

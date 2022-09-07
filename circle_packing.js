@@ -11,6 +11,7 @@
         this.setting_SPHERE(false)
 
         this.hatch_modes = ['LINES', 'CIRCLES', 'SPHERES']
+        this.sort_modes = ['NONE', 'SALESMAN', 'SIMPLE']
 
         this.gui_folder_draw_options.add(this, 'Rmin').onChange(function (v) { cvs.draw() }).min(5).step(1).max(this.wh_min*0.5)
         this.gui_folder_draw_options.add(this, 'Rmax').onChange(function (v) { cvs.draw() }).min(10).step(1).max(this.wh_min*0.5)
@@ -41,6 +42,7 @@
         this.gui_folder_defaults.add(this, 'setting_umbrella')
         this.gui_folder_defaults.add(this, 'fill_area_seeded')
         this.gui_folder_defaults.add(this, 'fill_area_random')
+        this.gui_folder_defaults.add(this, 'sort_mode', this.sort_modes).listen()
         this.gui_folder_defaults.add(this, 'optimize_path')
         this.gui_folder_defaults.add(this, 'draw_path').onChange(function (v) { cvs.draw() })
         this.gui_folder_defaults.add(this, 'path_optimized').listen()
@@ -75,6 +77,7 @@
         this.path_length = 0
         this.draw_path = false
         this.rand_seed = 0
+        this.sort_mode = 'SALESMAN'
         this.fill_area_seeded(redraw)
 
     }
@@ -103,6 +106,7 @@
         this.path_length = 0
         this.draw_path = false
         this.rand_seed = 0
+        this.sort_mode = 'SALESMAN'
         this.fill_area_seeded(redraw)
 
     }
@@ -132,6 +136,7 @@
         this.path_length = 0
         this.draw_path = false
         this.rand_seed = 0
+        this.sort_mode = 'SALESMAN'
         this.fill_area_seeded(redraw)
 
     }
@@ -149,8 +154,8 @@
         this.draw_hatches = true
         this.hatch_rand_center = false
         this.hatch_rotation_mode = 'FOCUS_POS'
-        this.hatch_rot_pos_x = 0.7
-        this.hatch_rot_pos_y = 0.3
+        this.hatch_rot_pos_x = 1.4
+        this.hatch_rot_pos_y = 1.1
         this.hatch_rotation_angle = 0
         this.hatch_max_off = 0.7
         this.missing_perc = 0
@@ -161,17 +166,39 @@
         this.path_length = 0
         this.draw_path = false
         this.rand_seed = 0
+        this.sort_mode = 'SIMPLE'
+
         this.fill_area_seeded(redraw)
 
     }
 
     draw(p, fgc = [0,0,0], bgc = [255,255,255]) {
         super.draw(p ,fgc,bgc)
+        let no_vertices = 0
 
-        let ver_dist = this.salesman_vertices.draw(p, this.draw_path)
+        if (this.sort_mode === 'SALESMAN'){
+            let ver_dist = this.salesman_vertices.draw(p, this.draw_path)
+            this.path_length = ver_dist[1]
+            no_vertices = ver_dist[0]
+        } else {
+            let c_prev = null
+            for (const c of this.circles) {
+                no_vertices += c.draw(p, this.draw_circumferences, this.draw_hatches, this.hatch_mode, this.missing_perc/100)
 
-        this.path_length = ver_dist[1]
-        return ver_dist[0]
+                if ( (this.draw_path) && (c_prev != null)) {
+                    p.stroke(255,50,50)
+                    p.beginShape()
+                    p.vertex(c.c[X], c.c[Y])
+                    p.vertex(c_prev.c[X], c_prev.c[Y])
+                    p.endShape()
+                    p.stroke(fgc)
+                }
+                c_prev = c
+            }
+        }
+
+
+        return no_vertices
     }
 
     fill_area_random() {
@@ -188,7 +215,6 @@
 
     fill_area_seeded(redraw = true) {
         cvs.randomSeed(this.rand_seed)
-        this.circles = []
         this.path_optimized = false
 
         let my_plasma = new Plasma(1 << this.plasma_depth)
@@ -239,9 +265,6 @@
                 fails++
                 continue
             } else {
-                let new_circle = new MyCircle([x, y], radius)
-                this.circles.push(new_circle)
-
                 let rot = this.hatch_rotation_angle
                 if (this.hatch_rotation_mode === 'RANDOM') {
                     rot = 2*Math.PI*cvs.random()
@@ -257,6 +280,11 @@
 
                 }
                 let rotM2 = rot2(rot)
+
+                let new_circle = new MyCircle([x, y], radius, rot)
+                this.circles.push(new_circle)
+
+
 
                 // line hatches
                 let hatch_frac = (pl_val-this.plasma_min_height)/(1-this.plasma_min_height)
@@ -281,10 +309,24 @@
         this.no_circles = this.circles.length
 
         // pre draw the whole thing
-        this.salesman_vertices = new SalesmanVerticesNodeSet()
-        for (const c of this.circles) {
-            c.draw(this.salesman_vertices, this.draw_circumferences, this.draw_hatches, this.hatch_mode, this.missing_perc/100)
+        if (this.sort_mode === 'SALESMAN') {
+            this.salesman_vertices = new SalesmanVerticesNodeSet()
+            for (const c of this.circles) {
+                c.draw(this.salesman_vertices, this.draw_circumferences, this.draw_hatches, this.hatch_mode, this.missing_perc/100)
+            }
+        } else if (this.sort_mode === 'SIMPLE') {
+            this.circles.sort(function(a,b){return a.c[X] - b.c[X]})
+            let NO_Y_SORT_STEPS = 10
+            let new_circles = new Array()
+            for (let i = 0; i < this.circles.length; i += NO_Y_SORT_STEPS) {
+                let chunk = this.circles.slice(i, i + NO_Y_SORT_STEPS);
+                chunk.sort(function(a,b){return ((((i%2)==0) ? -1 : 1)*(a.c[Y] - b.c[Y]))})
+                new_circles = new_circles.concat(chunk)
+            }
+            this.circles = new_circles
+
         }
+        
 
         if(redraw) {
             cvs.draw()
@@ -296,9 +338,10 @@
 }
 
 class MyCircle {
-    constructor(V, R) {
+    constructor(V, R, rotation = 0 ) {
         this.c = [...V]
         this.R = R
+        this.rotation = rotation
         this.hatches_lines = []
         this.hatch_circles = []
     }
@@ -307,24 +350,24 @@ class MyCircle {
         let no_vertices = 0
 
         if (draw_hatch_mode == 'umbrellas') {
-            let umbr = new MyUmbrella(this.c, this.R)
+            let rot = 0
+            let umbr = new MyUmbrella(this.c, this.R-1, this.rotation)
             no_vertices = umbr.draw(salesman_vertices)
             return no_vertices
         }
 
 
         if (draw_circumference) {
-            // p.beginShape()
             if (Math.random() > (missing_frac)) {
                 salesman_vertices.beginShape()
                 for (let theta = 0; theta <= 2*Math.PI + FLOATING_POINT_ACCURACY; theta +=  2*Math.PI / 100) {
                     // DEBUG sinus
                     let V = this.pointOn(theta)
-                    salesman_vertices.addVertex(V[X], V[Y])
+                    salesman_vertices.vertex(V[X], V[Y])
                     // p.vertex(V[X], V[Y])
                     // no_vertices ++
                 }
-                // p.endShape() 
+                salesman_vertices.endShape() 
             }
         }
 
@@ -333,8 +376,9 @@ class MyCircle {
                 for (const h of this.hatch_lines) {
                     if (Math.random() > (missing_frac)) {
                         salesman_vertices.beginShape()
-                        salesman_vertices.addVertex(h[0][X], h[0][Y])
-                        salesman_vertices.addVertex(h[1][X], h[1][Y])
+                        salesman_vertices.vertex(h[0][X], h[0][Y])
+                        salesman_vertices.vertex(h[1][X], h[1][Y])
+                        salesman_vertices.endShape() 
                     }
                 } 
             } else if (draw_hatch_mode === 'CIRCLES') {
@@ -346,8 +390,9 @@ class MyCircle {
                             V[X] = hc.c[X] + hc.R * Math.sin(theta)
                             V[Y] = hc.c[Y] + hc.R * Math.cos(theta)
                             if (Math.random() > (missing_frac))
-                                salesman_vertices.addVertex(V[X], V[Y])
+                                salesman_vertices.vertex(V[X], V[Y])
                         }
+                        salesman_vertices.endShape() 
                     }
                 }
             } else if (draw_hatch_mode === 'SPHERES') {
@@ -358,8 +403,9 @@ class MyCircle {
                             let V = new Array(2)
                             V[X] = hs.c[X] + hs.R * Math.sin(theta)
                             V[Y] = hs.c[Y] + hs.R * Math.cos(theta)
-                            salesman_vertices.addVertex(V[X], V[Y])
+                            salesman_vertices.vertex(V[X], V[Y])
                         }
+                        salesman_vertices.endShape() 
                     }
                 }
 
