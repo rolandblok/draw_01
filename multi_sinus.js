@@ -112,7 +112,7 @@ class multi_sinus extends Drawer {
     }
 
     rando() {
-        this.no_lines = 20 + Math.random() * 100
+        this.no_lines = Math.round(20 + Math.random() * 100)
         this.randseed = Math.floor(Math.random() *100)
         this.no_sinusus = 10 + Math.floor(100*Math.random())
         this.sinus_scale = 20*Math.random()

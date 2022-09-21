@@ -92,7 +92,7 @@ class circle_sinus extends Drawer {
         this.S2 = Math.random() * 100  * this.wh_min / 1260
         this.freq = Math.floor(Math.random() * 50)
         this.delay = Math.random()*0.05
-        this.no_revelations = Math.random()*100
+        this.no_revelations = Math.round(Math.random()*100)
         this.discretizatie = 1250
         cvs.draw() 
     }
@@ -147,15 +147,20 @@ class circle_sinus extends Drawer {
             let rev_ustep = this.delay / this.discretizatie
             p.beginShape()
             for (let step = 0; step < no_steps; step ++) {
+                let rev_no = Math.floor(step / this.discretizatie)
+                let first_last = 1
+                if ((rev_no == 0) || (rev_no == this.no_revelations-1)) {
+                    first_last = 0
+                }
                 let X = this.my_circle_sinus(R, S, phi, rev )
                 let x2 = X[0] 
                 let y2 = X[1]
                 this.vertex_middle(p, x2,y2)
                 no_vertices ++
                 S += S_ustep
-                R += R_ustep
+                R += first_last*R_ustep
                 phi += phi_ustep
-                rev += rev_ustep
+                rev += first_last*rev_ustep
             }
             p.endShape()
         }
