@@ -38,7 +38,7 @@ class circle_sinus extends Drawer {
         this.delay = 0.008
         this.spiral = true
         this.no_revelations = 83
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
     setting2() {
@@ -49,7 +49,7 @@ class circle_sinus extends Drawer {
         this.freq = 11
         this.delay = 0.016
         this.no_revelations = 57
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
     setting3() {
@@ -60,7 +60,7 @@ class circle_sinus extends Drawer {
         this.freq = 15
         this.delay = 0.016
         this.no_revelations = 57
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
     setting4() {
@@ -71,7 +71,7 @@ class circle_sinus extends Drawer {
         this.freq = 7
         this.delay = 0.015
         this.no_revelations = 93
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
     setting5() {
@@ -82,7 +82,7 @@ class circle_sinus extends Drawer {
         this.freq = 3
         this.delay = 0.129
         this.no_revelations = 41
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
     rando() {
@@ -93,7 +93,7 @@ class circle_sinus extends Drawer {
         this.freq = Math.floor(Math.random() * 50)
         this.delay = Math.random()*0.05
         this.no_revelations = Math.round(Math.random()*100)
-        this.discretizatie = 1250
+        this.discretizatie = 500
         cvs.draw() 
     }
 
