@@ -34,6 +34,7 @@ class circle_lines_2  extends Drawer{
 
         this.gui_folder_defaults.add(this, 'setting1')
         this.gui_folder_defaults.add(this, 'mars_aarde')
+        this.gui_folder_defaults.add(this, 'setting3')
         this.gui_folder_defaults.add(this, 'rando')
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
@@ -84,6 +85,20 @@ class circle_lines_2  extends Drawer{
         this.ph1 = 0
         this.ph1_end = 47.83
         this.ph2_delay = 686.971/365.0
+
+        this.randseed = 0
+        cvs.draw()
+
+    }
+    setting3() {
+        this.kader = 0
+        this.discretizatie = 100
+        this.no_lines = 700
+        this.R1_perc = 90
+        this.R2_perc = 50
+        this.ph1 = 0
+        this.ph1_end = 10.47
+        this.ph2_delay = 4.18
 
         this.randseed = 0
         cvs.draw()
