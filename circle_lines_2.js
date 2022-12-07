@@ -1,8 +1,8 @@
 
-class circle_lines  extends Drawer{
+class circle_lines_2  extends Drawer{
 
     constructor(gui, xywh, sub_gui = '') {
-        super('cirlce lines options',gui, xywh, sub_gui)
+        super('cirlce lines 2 options',gui, xywh, sub_gui)
 
 
         this.setting1()
@@ -10,15 +10,13 @@ class circle_lines  extends Drawer{
 
         this.ph1_MAX = 4* Math.PI
         this.ph1_end_MAX = 8*  Math.PI
-        this.ph2_MAX = 4* Math.PI
-        this.ph2_end_MAX = 8* Math.PI
+        this.ph2_delay_MAX = 10
         this.no_lines_MAX = 500
 
         this.gui_folder_draw_options.add(this, 'no_lines').onChange(function (v) { cvs.draw() }).min(10).step(1).listen()
         this.gui_folder_draw_options.add(this, 'ph1').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
         this.gui_folder_draw_options.add(this, 'ph1_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.01).listen()
-        this.gui_folder_draw_options.add(this, 'ph2').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
-        this.gui_folder_draw_options.add(this, 'ph2_end').onChange(function (v) { cvs.draw() }).min(0.1).step(0.01).listen()
+        this.gui_folder_draw_options.add(this, 'ph2_delay').onChange(function (v) { cvs.draw() }).min(0).step(0.01).listen()
         this.gui_folder_draw_options.add(this, 'R1_perc').onChange(function (v) { cvs.draw() }).min(10).step(1)
         this.gui_folder_draw_options.add(this, 'R2_perc').onChange(function (v) { cvs.draw() }).min(10).step(1)
         this.gui_folder_draw_options.add(this,'discretizatie').onChange(function (v) { cvs.draw() }).min(1).step(10)
@@ -35,7 +33,7 @@ class circle_lines  extends Drawer{
         
 
         this.gui_folder_defaults.add(this, 'setting1')
-        this.gui_folder_defaults.add(this, 'setting2')
+        this.gui_folder_defaults.add(this, 'mars_aarde')
         this.gui_folder_defaults.add(this, 'rando')
         this.gui_folder_defaults.open()
         this.gui_folder_draw_options.open()
@@ -67,27 +65,25 @@ class circle_lines  extends Drawer{
     setting1() {
         this.kader = 0
         this.discretizatie = 100
-        this.no_lines = 200
+        this.no_lines = 700
         this.R1_perc = 90
-        this.R2_perc = this.R1_perc
+        this.R2_perc = 50
         this.ph1 = 0
-        this.ph1_end = 5
-        this.ph2 = Math.PI
-        this.ph2_end = 2*Math.PI
+        this.ph1_end = 12*Math.PI
+        this.ph2_delay = 2
 
         this.randseed = 0
         cvs.draw()
 
     }
-    setting2() {
+    mars_aarde() {
         this.discretizatie = 100
-        this.no_lines = 200
+        this.no_lines = 700
         this.R1_perc = 90
-        this.R2_perc = this.R1_perc
-        this.ph1 = 3.25
-        this.ph1_end = 6.2
-        this.ph2 = 5.71
-        this.ph2_end = 12.1
+        this.R2_perc = this.R1_perc/(1.5)
+        this.ph1 = 0
+        this.ph1_end = 47.83
+        this.ph2_delay = 686.971/365.0
 
         this.randseed = 0
         cvs.draw()
@@ -96,8 +92,7 @@ class circle_lines  extends Drawer{
     rando() {
         this.ph1 = Math.random() * this.ph1_MAX
         this.ph1_end = Math.random() *this.ph1_end_MAX
-        this.ph2 = Math.random() * this.ph2_MAX
-        this.ph2_end = Math.random() * this.ph2_end_MAX
+        this.ph2_delay = Math.random() * this.ph2_delay_MAX
         this.no_lines = 20 + Math.random()*this.no_lines_MAX
 
         cvs.draw() 
@@ -131,7 +126,7 @@ class circle_lines  extends Drawer{
         let my_xagon = new Xagon(Math.PI*R*R, 5)
 
         let step_ph1 = (this.ph1_end - this.ph1)/this.no_lines
-        let step_ph2 = (this.ph2_end - this.ph2)/this.no_lines
+        let step_ph2 = step_ph1*this.ph2_delay
         for (let i = 0; i < this.no_lines; i ++){
             p.beginShape()
 
@@ -145,8 +140,8 @@ class circle_lines  extends Drawer{
             this.vertex_middle(p, V[X], V[Y])
             no_vertices ++
 
-            V[X] = R2 * p.sin(i*step_ph2 + this.ph2)
-            V[Y] = R2 * p.cos(i*step_ph2 + this.ph2)
+            V[X] = R2 * p.sin(i*step_ph2)
+            V[Y] = R2 * p.cos(i*step_ph2)
             this.vertex_middle(p, V[X], V[Y])
             no_vertices ++
 

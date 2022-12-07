@@ -16,10 +16,11 @@ var gui = new dat.GUI();
 var settings = []
 settings.draw_modes  = ['TEMPLEET', 'wave_circle', 'wave_wave', 'spirograph','circle_snake', 
                         'triangle_snake','block_snake', 'circle_sinus', 'read_json', 'sphere_band', 'manipul_lines', 
-                        'circle_lines', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
+                        'circle_lines', 'circle_lines_2', 'multi_sinus', 'circle_block_snake', 'plasma_lines', 'csg','hex_circle', 'xagon_draw',
                       'circle_packing', 'salesman', 'sierpinski', 'sphere3d', 'phase_circle', 'stairs', 'umbrella', 'sphere_spiral']
 // settings.draw_mode = settings.draw_modes[settings.draw_modes.length-1]
 settings.draw_mode = 'TEMPLEET'
+settings.draw_mode = 'circle_lines_2'
 gui.add(settings, 'draw_mode', settings.draw_modes).onChange(function(v){set_draw_mode()})
 settings.invert_color = false
 gui.add(settings, 'invert_color').onChange(function (v) { cvs.draw() })
@@ -219,6 +220,8 @@ class DrawerSet {
       current_drawer = new manipul_lines(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'circle_lines'){
       current_drawer = new circle_lines(gui, xywh, gui_string)
+    } else if (settings.draw_mode == 'circle_lines_2'){
+      current_drawer = new circle_lines_2(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'multi_sinus'){
       current_drawer = new multi_sinus(gui, xywh, gui_string)
     } else if (settings.draw_mode == 'circle_block_snake'){
